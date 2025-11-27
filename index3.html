@@ -1,0 +1,2402 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerak Parabola - Pembelajaran Interaktif</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .tab-button:hover:not(.active) {
+            background-color: #f3f4f6;
+            transform: translateY(-1px);
+        }
+        
+        .tab-button.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: 2px solid #10b981;
+        }
+        
+        .tab-button.completed:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        
+        .formula-box {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .derivation-step {
+            background: linear-gradient(135deg, #fef7ff, #f3e8ff);
+            border: 2px solid #a855f7;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .math-equation {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        
+        .experiment-card {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .experiment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+        }
+        
+        .flashcard {
+            perspective: 1000px;
+            height: 300px;
+        }
+        
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .flashcard-front {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .flashcard-back {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            transform: rotateY(180deg);
+        }
+        
+        .component-analysis {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .glb-section {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-left: 4px solid #10b981;
+        }
+        
+        .glbb-section {
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            border-left: 4px solid #ef4444;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
+  <script>
+        // Tab functionality
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                        btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-green-500', 'text-white');
+                    });
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    button.classList.remove('bg-gray-200', 'text-gray-700');
+                    button.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-green-500', 'text-white');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show target tab content
+                    const targetContent = document.getElementById(targetTab);
+                    if (targetContent) {
+                        targetContent.classList.remove('hidden');
+                    }
+                    
+                    // Update progress
+                    updateProgress();
+                });
+            });
+        }
+        
+        // Progress tracking
+        function updateProgress() {
+            const completedTabs = document.querySelectorAll('.tab-button.completed').length;
+            const totalTabs = document.querySelectorAll('.tab-button').length;
+            const progressPercentage = Math.round((completedTabs / totalTabs) * 100);
+            
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentageElement = document.getElementById('progress-percentage');
+            const progressStatus = document.getElementById('progress-status');
+            
+            if (progressBar) progressBar.style.width = progressPercentage + '%';
+            if (progressPercentageElement) progressPercentageElement.textContent = progressPercentage + '%';
+            
+            if (progressStatus) {
+                if (progressPercentage === 0) {
+                    progressStatus.textContent = 'Belum dimulai';
+                } else if (progressPercentage < 100) {
+                    progressStatus.textContent = 'Sedang belajar';
+                } else {
+                    progressStatus.textContent = 'Selesai';
+                    showAchievementBadge();
+                }
+            }
+        }
+        
+        function showAchievementBadge() {
+            const badge = document.getElementById('achievement-badge');
+            if (badge) {
+                badge.classList.remove('hidden');
+            }
+        }
+        
+        // Animation controls
+        function initializeAnimations() {
+            // Horizontal velocity animation controls
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const playPauseText = document.getElementById('play-pause-text');
+            let isPlaying = true;
+            
+            if (playPauseBtn && playPauseText) {
+                playPauseBtn.addEventListener('click', () => {
+                    const svg = document.getElementById('animated-trajectory');
+                    const animations = svg.querySelectorAll('animateMotion, animate');
+                    
+                    if (isPlaying) {
+                        animations.forEach(anim => anim.pauseAnimations());
+                        playPauseText.textContent = '▶ Play';
+                        isPlaying = false;
+                    } else {
+                        animations.forEach(anim => anim.unpauseAnimations());
+                        playPauseText.textContent = '⏸ Pause';
+                        isPlaying = true;
+                    }
+                });
+            }
+            
+            // Vertical velocity animation
+            initializeVerticalAnimation();
+            
+            // Vector sum animation
+            initializeVectorSumAnimation();
+        }
+        
+        function initializeVerticalAnimation() {
+            const verticalPlayPauseBtn = document.getElementById('vertical-play-pause-btn');
+            const verticalPlayPauseText = document.getElementById('vertical-play-pause-text');
+            let verticalIsPlaying = true;
+            
+            if (verticalPlayPauseBtn && verticalPlayPauseText) {
+                verticalPlayPauseBtn.addEventListener('click', () => {
+                    const svg = document.getElementById('vertical-trajectory');
+                    const animations = svg.querySelectorAll('animateMotion, animate');
+                    
+                    if (verticalIsPlaying) {
+                        animations.forEach(anim => anim.pauseAnimations());
+                        verticalPlayPauseText.textContent = '▶ Play';
+                        verticalIsPlaying = false;
+                    } else {
+                        animations.forEach(anim => anim.unpauseAnimations());
+                        verticalPlayPauseText.textContent = '⏸ Pause';
+                        verticalIsPlaying = true;
+                    }
+                });
+            }
+            
+            // Update vertical velocity vector dynamically
+            updateVerticalVelocityVector();
+        }
+        
+        function updateVerticalVelocityVector() {
+            const velocityLine = document.getElementById('vertical-velocity-line');
+            const motionPhase = document.getElementById('motion-phase');
+            const velocityMagnitude = document.getElementById('velocity-magnitude');
+            
+            if (!velocityLine || !motionPhase || !velocityMagnitude) return;
+            
+            let time = 0;
+            const totalTime = 6; // 6 seconds total animation (matching SVG animation)
+            const g = 9.8;
+            const v0y = 15; // initial vertical velocity
+            const peakTime = v0y / g; // time to reach peak (vy = 0)
+            
+            function animate() {
+                // Calculate progress through one complete cycle (0 to 1)
+                const cycleProgress = (time % totalTime) / totalTime;
+                
+                // Map cycle progress to physics time (0 to 2*peakTime for complete trajectory)
+                const physicsTime = cycleProgress * (2 * peakTime);
+                
+                // Calculate current vertical velocity
+                const vy = v0y - g * physicsTime;
+                const vyMagnitude = Math.abs(vy);
+                
+                // Update vector length and direction with proper scaling
+                const maxLength = 60; // Maximum vector length
+                const vectorLength = Math.min(vyMagnitude * 3.5, maxLength);
+                
+                if (vy > 0.5) {
+                    // Going up - vector points upward and gets shorter as velocity decreases
+                    velocityLine.setAttribute('x1', '0');
+                    velocityLine.setAttribute('y1', '0');
+                    velocityLine.setAttribute('x2', '0');
+                    velocityLine.setAttribute('y2', -vectorLength); // negative Y = upward
+                    velocityLine.setAttribute('marker-end', 'url(#arrow-vertical-up)');
+                    velocityLine.setAttribute('opacity', '1');
+                    velocityLine.setAttribute('stroke', '#dc2626'); // red color
+                    motionPhase.textContent = 'Naik (melambat)';
+                    velocityMagnitude.textContent = `vᵧ = +${vy.toFixed(1)} m/s`;
+                } else if (vy < -0.5) {
+                    // Going down - vector points downward and gets longer as velocity increases
+                    velocityLine.setAttribute('x1', '0');
+                    velocityLine.setAttribute('y1', '0');
+                    velocityLine.setAttribute('x2', '0');
+                    velocityLine.setAttribute('y2', vectorLength); // positive Y = downward
+                    velocityLine.setAttribute('marker-end', 'url(#arrow-vertical-down)');
+                    velocityLine.setAttribute('opacity', '1');
+                    velocityLine.setAttribute('stroke', '#dc2626'); // red color
+                    motionPhase.textContent = 'Turun (mempercepat)';
+                    velocityMagnitude.textContent = `vᵧ = ${vy.toFixed(1)} m/s`;
+                } else {
+                    // At peak - vector disappears completely (vy ≈ 0)
+                    velocityLine.setAttribute('x1', '0');
+                    velocityLine.setAttribute('y1', '0');
+                    velocityLine.setAttribute('x2', '0');
+                    velocityLine.setAttribute('y2', '0');
+                    velocityLine.setAttribute('opacity', '0');
+                    motionPhase.textContent = 'Puncak (vᵧ = 0)';
+                    velocityMagnitude.textContent = 'vᵧ = 0.0 m/s';
+                }
+                
+                time += 0.05; // increment time
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function initializeVectorSumAnimation() {
+            const vectorSumPlayPauseBtn = document.getElementById('vector-sum-play-pause-btn');
+            const vectorSumPlayPauseText = document.getElementById('vector-sum-play-pause-text');
+            let vectorSumIsPlaying = true;
+            
+            if (vectorSumPlayPauseBtn && vectorSumPlayPauseText) {
+                vectorSumPlayPauseBtn.addEventListener('click', () => {
+                    const svg = document.getElementById('vector-sum-trajectory');
+                    const animations = svg.querySelectorAll('animateMotion, animate');
+                    
+                    if (vectorSumIsPlaying) {
+                        animations.forEach(anim => anim.pauseAnimations());
+                        vectorSumPlayPauseText.textContent = '▶ Play';
+                        vectorSumIsPlaying = false;
+                    } else {
+                        animations.forEach(anim => anim.unpauseAnimations());
+                        vectorSumPlayPauseText.textContent = '⏸ Pause';
+                        vectorSumIsPlaying = true;
+                    }
+                });
+            }
+            
+            // Update vector sum animation
+            updateVectorSumAnimation();
+        }
+        
+        function updateVectorSumAnimation() {
+            const vyLine = document.getElementById('vy-line');
+            const vyLabel = document.getElementById('vy-label');
+            const vtotalLine = document.getElementById('vtotal-line');
+            const vtotalLabel = document.getElementById('vtotal-label');
+            const parallelLine1 = document.getElementById('parallel-line1');
+            const parallelLine2 = document.getElementById('parallel-line2');
+            
+            if (!vyLine || !vtotalLine) return;
+            
+            let time = 0;
+            const totalTime = 5;
+            const g = 9.8;
+            const v0y = 15;
+            const vx = 20; // constant horizontal velocity
+            
+            function animate() {
+                // Calculate progress through one complete cycle (0 to 1)
+                const cycleProgress = (time % totalTime) / totalTime;
+                
+                // Map cycle progress to physics time for parabolic motion
+                const physicsTime = cycleProgress * (2 * v0y / g); // Complete trajectory time
+                
+                const vy = v0y - g * physicsTime;
+                const vyMagnitude = Math.abs(vy);
+                
+                // Update vy vector
+                const vyLength = Math.min(vyMagnitude * 2, 40);
+                if (vy > 0.5) {
+                    vyLine.setAttribute('x1', '0');
+                    vyLine.setAttribute('y1', '0');
+                    vyLine.setAttribute('x2', '0');
+                    vyLine.setAttribute('y2', -vyLength);
+                    vyLabel.setAttribute('x', '5');
+                    vyLabel.setAttribute('y', -vyLength / 2);
+                } else if (vy < -0.5) {
+                    vyLine.setAttribute('x1', '0');
+                    vyLine.setAttribute('y1', '0');
+                    vyLine.setAttribute('x2', '0');
+                    vyLine.setAttribute('y2', vyLength);
+                    vyLabel.setAttribute('x', '5');
+                    vyLabel.setAttribute('y', vyLength / 2);
+                } else {
+                    vyLine.setAttribute('x1', '0');
+                    vyLine.setAttribute('y1', '0');
+                    vyLine.setAttribute('x2', '0');
+                    vyLine.setAttribute('y2', '0');
+                    vyLabel.setAttribute('x', '5');
+                    vyLabel.setAttribute('y', '-5');
+                }
+                
+                // Update vtotal vector (resultant) - this represents the actual velocity direction
+                const vtotalMagnitude = Math.sqrt(vx * vx + vy * vy);
+                const vtotalLength = Math.min(vtotalMagnitude * 1.5, 60);
+                
+                // Calculate angle based on actual velocity components
+                const angle = Math.atan2(-vy, vx); // negative vy because SVG y-axis is inverted
+                
+                const vtotalX = vtotalLength * Math.cos(angle);
+                const vtotalY = vtotalLength * Math.sin(angle);
+                
+                vtotalLine.setAttribute('x1', '0');
+                vtotalLine.setAttribute('y1', '0');
+                vtotalLine.setAttribute('x2', vtotalX);
+                vtotalLine.setAttribute('y2', vtotalY);
+                
+                // Position label along the vector
+                vtotalLabel.setAttribute('x', vtotalX * 0.6);
+                vtotalLabel.setAttribute('y', vtotalY * 0.6 - 5);
+                
+                // Update parallelogram lines to complete the vector addition
+                if (Math.abs(vy) > 0.5) {
+                    // Line from tip of vx to tip of vtotal (parallel to vy)
+                    parallelLine1.setAttribute('x1', '50');
+                    parallelLine1.setAttribute('y1', '0');
+                    parallelLine1.setAttribute('x2', vtotalX);
+                    parallelLine1.setAttribute('y2', vtotalY);
+                    parallelLine1.setAttribute('opacity', '0.7');
+                    
+                    // Line from tip of vy to tip of vtotal (parallel to vx)
+                    parallelLine2.setAttribute('x1', '0');
+                    parallelLine2.setAttribute('y1', -vyLength * Math.sign(vy));
+                    parallelLine2.setAttribute('x2', vtotalX);
+                    parallelLine2.setAttribute('y2', vtotalY);
+                    parallelLine2.setAttribute('opacity', '0.7');
+                } else {
+                    // At peak, hide parallelogram lines since vy = 0
+                    parallelLine1.setAttribute('opacity', '0');
+                    parallelLine2.setAttribute('opacity', '0');
+                }
+                
+                time += 0.05;
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // Simulation functionality
+        function initializeSimulation() {
+            const velocitySlider = document.getElementById('velocity-slider');
+            const angleSlider = document.getElementById('angle-slider');
+            const velocityValue = document.getElementById('velocity-value');
+            const angleValue = document.getElementById('angle-value');
+            const startBtn = document.getElementById('start-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            
+            if (velocitySlider && velocityValue) {
+                velocitySlider.addEventListener('input', (e) => {
+                    velocityValue.textContent = e.target.value + ' m/s';
+                    updateCalculations();
+                });
+            }
+            
+            if (angleSlider && angleValue) {
+                angleSlider.addEventListener('input', (e) => {
+                    angleValue.textContent = e.target.value + '°';
+                    updateCalculations();
+                });
+            }
+            
+            if (startBtn) {
+                startBtn.addEventListener('click', startSimulation);
+            }
+            
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetSimulation);
+            }
+            
+            updateCalculations();
+        }
+        
+        function updateCalculations() {
+            const velocity = parseFloat(document.getElementById('velocity-slider')?.value || 30);
+            const angle = parseFloat(document.getElementById('angle-slider')?.value || 45);
+            const g = 9.8;
+            
+            const angleRad = angle * Math.PI / 180;
+            const v0x = velocity * Math.cos(angleRad);
+            const v0y = velocity * Math.sin(angleRad);
+            
+            const maxHeight = (v0y * v0y) / (2 * g);
+            const flightTime = (2 * v0y) / g;
+            const range = (velocity * velocity * Math.sin(2 * angleRad)) / g;
+            
+            const maxHeightElement = document.getElementById('max-height');
+            const rangeElement = document.getElementById('range');
+            const flightTimeElement = document.getElementById('flight-time');
+            
+            if (maxHeightElement) maxHeightElement.textContent = maxHeight.toFixed(2);
+            if (rangeElement) rangeElement.textContent = range.toFixed(2);
+            if (flightTimeElement) flightTimeElement.textContent = flightTime.toFixed(2);
+        }
+        
+        function startSimulation() {
+            const projectile = document.getElementById('projectile');
+            const trajectoryPath = document.getElementById('trajectory-path');
+            
+            if (!projectile || !trajectoryPath) return;
+            
+            const velocity = parseFloat(document.getElementById('velocity-slider')?.value || 30);
+            const angle = parseFloat(document.getElementById('angle-slider')?.value || 45);
+            const g = 9.8;
+            
+            const angleRad = angle * Math.PI / 180;
+            const v0x = velocity * Math.cos(angleRad);
+            const v0y = velocity * Math.sin(angleRad);
+            const flightTime = (2 * v0y) / g;
+            const range = (velocity * velocity * Math.sin(2 * angleRad)) / g;
+            
+            // Scale for canvas
+            const scaleX = 400 / Math.max(range, 100);
+            const scaleY = 200 / Math.max((v0y * v0y) / (2 * g), 50);
+            
+            // Create trajectory path
+            let pathData = `M 50 280`;
+            for (let t = 0; t <= flightTime; t += flightTime / 50) {
+                const x = 50 + v0x * t * scaleX;
+                const y = 280 - (v0y * t - 0.5 * g * t * t) * scaleY;
+                pathData += ` L ${x} ${y}`;
+            }
+            
+            trajectoryPath.setAttribute('d', pathData);
+            trajectoryPath.setAttribute('opacity', '1');
+            
+            // Animate projectile
+            projectile.setAttribute('opacity', '1');
+            animateProjectile(flightTime * 1000, scaleX, scaleY, v0x, v0y, g);
+        }
+        
+        function animateProjectile(duration, scaleX, scaleY, v0x, v0y, g) {
+            const projectile = document.getElementById('projectile');
+            if (!projectile) return;
+            
+            const startTime = Date.now();
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / duration;
+                
+                if (progress >= 1) {
+                    projectile.setAttribute('cx', '50');
+                    projectile.setAttribute('cy', '280');
+                    return;
+                }
+                
+                const t = (progress * duration) / 1000;
+                const x = 50 + v0x * t * scaleX;
+                const y = 280 - (v0y * t - 0.5 * g * t * t) * scaleY;
+                
+                projectile.setAttribute('cx', x);
+                projectile.setAttribute('cy', y);
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function resetSimulation() {
+            const projectile = document.getElementById('projectile');
+            const trajectoryPath = document.getElementById('trajectory-path');
+            
+            if (projectile) {
+                projectile.setAttribute('cx', '50');
+                projectile.setAttribute('cy', '280');
+                projectile.setAttribute('opacity', '0');
+            }
+            
+            if (trajectoryPath) {
+                trajectoryPath.setAttribute('opacity', '0');
+            }
+        }
+        
+        // Flash card functionality
+        function initializeFlashCards() {
+            const resetCardsBtn = document.getElementById('reset-cards');
+            
+            if (resetCardsBtn) {
+                resetCardsBtn.addEventListener('click', () => {
+                    const flashcards = document.querySelectorAll('.flashcard');
+                    flashcards.forEach(card => {
+                        card.classList.remove('flipped');
+                    });
+                });
+            }
+        }
+        
+        function flipCard(card) {
+            card.classList.toggle('flipped');
+        }
+        
+        // Problem slides functionality
+        function initializeProblemSlides() {
+            const slideNavBtns = document.querySelectorAll('.slide-nav-btn');
+            const prevBtn = document.getElementById('prev-slide');
+            const nextBtn = document.getElementById('next-slide');
+            let currentSlide = 1;
+            
+            slideNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const slideNumber = parseInt(btn.getAttribute('data-slide'));
+                    showSlide(slideNumber);
+                });
+            });
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (currentSlide > 1) {
+                        showSlide(currentSlide - 1);
+                    }
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (currentSlide < 4) {
+                        showSlide(currentSlide + 1);
+                    }
+                });
+            }
+            
+            function showSlide(slideNumber) {
+                currentSlide = slideNumber;
+                
+                // Hide all slides
+                for (let i = 1; i <= 4; i++) {
+                    const slide = document.getElementById(`slide-${i}`);
+                    if (slide) slide.classList.add('hidden');
+                }
+                
+                // Show target slide
+                const targetSlide = document.getElementById(`slide-${slideNumber}`);
+                if (targetSlide) targetSlide.classList.remove('hidden');
+                
+                // Update navigation buttons
+                slideNavBtns.forEach(btn => {
+                    const btnSlide = parseInt(btn.getAttribute('data-slide'));
+                    if (btnSlide === slideNumber) {
+                        btn.classList.add('active');
+                        btn.classList.remove('bg-gray-300', 'text-gray-700');
+                        
+                        // Set color based on difficulty
+                        if (slideNumber === 1) {
+                            btn.classList.add('bg-green-500', 'text-white');
+                        } else if (slideNumber === 2) {
+                            btn.classList.add('bg-orange-500', 'text-white');
+                        } else if (slideNumber === 3) {
+                            btn.classList.add('bg-red-500', 'text-white');
+                        } else if (slideNumber === 4) {
+                            btn.classList.add('bg-purple-500', 'text-white');
+                        }
+                    } else {
+                        btn.classList.remove('active', 'bg-green-500', 'bg-orange-500', 'bg-red-500', 'bg-purple-500', 'text-white');
+                        btn.classList.add('bg-gray-300', 'text-gray-700');
+                    }
+                });
+                
+                // Update difficulty indicators
+                const indicators = document.querySelectorAll('.slide-difficulty-indicator');
+                indicators.forEach((indicator, index) => {
+                    if (index + 1 === slideNumber) {
+                        indicator.classList.add('active');
+                        if (slideNumber === 1) indicator.className = 'slide-difficulty-indicator active w-3 h-3 bg-green-500 rounded-full';
+                        else if (slideNumber === 2) indicator.className = 'slide-difficulty-indicator active w-3 h-3 bg-orange-500 rounded-full';
+                        else if (slideNumber === 3) indicator.className = 'slide-difficulty-indicator active w-3 h-3 bg-red-500 rounded-full';
+                        else if (slideNumber === 4) indicator.className = 'slide-difficulty-indicator active w-3 h-3 bg-purple-500 rounded-full';
+                    } else {
+                        indicator.classList.remove('active');
+                        indicator.className = 'slide-difficulty-indicator w-3 h-3 bg-gray-300 rounded-full';
+                    }
+                });
+                
+                // Update prev/next buttons
+                if (prevBtn) {
+                    prevBtn.disabled = slideNumber === 1;
+                }
+                if (nextBtn) {
+                    nextBtn.disabled = slideNumber === 4;
+                }
+            }
+        }
+        
+        // Quiz functionality
+        function initializeQuiz() {
+            const quizQuestions = [
+                {
+                    question: "Gerak parabola adalah gabungan dari gerak lurus beraturan (GLB) pada sumbu horizontal dan gerak lurus berubah beraturan (GLBB) pada sumbu vertikal.",
+                    answer: true,
+                    explanation: "Benar! Pada sumbu horizontal tidak ada percepatan (GLB), sedangkan pada sumbu vertikal ada percepatan gravitasi (GLBB)."
+                },
+                {
+                    question: "Pada gerak parabola, kecepatan horizontal proyektil berubah-ubah karena pengaruh gravitasi.",
+                    answer: false,
+                    explanation: "Salah! Gravitasi hanya bekerja vertikal, sehingga kecepatan horizontal tetap konstan sepanjang lintasan."
+                },
+                {
+                    question: "Di titik tertinggi lintasan parabola, kecepatan vertikal proyektil sama dengan nol (vᵧ = 0).",
+                    answer: true,
+                    explanation: "Benar! Di puncak lintasan, proyektil berhenti bergerak vertikal sejenak sebelum mulai turun."
+                },
+                {
+                    question: "Sudut elevasi 45° memberikan jangkauan maksimum untuk proyektil yang diluncurkan dari tanah.",
+                    answer: true,
+                    explanation: "Benar! Pada sudut 45°, sin 2θ = sin 90° = 1 (nilai maksimum), sehingga jangkauan maksimal."
+                },
+                {
+                    question: "Waktu yang diperlukan proyektil untuk naik ke titik tertinggi sama dengan waktu untuk turun kembali ke tanah.",
+                    answer: true,
+                    explanation: "Benar! Gerak parabola bersifat simetris, waktu naik = waktu turun."
+                },
+                {
+                    question: "Pada gerak parabola, percepatan gravitasi hanya mempengaruhi komponen vertikal gerakan, tidak mempengaruhi komponen horizontal.",
+                    answer: true,
+                    explanation: "Benar! Gravitasi bekerja vertikal ke bawah, sehingga hanya mempengaruhi komponen vertikal. Komponen horizontal tidak terpengaruh gravitasi."
+                },
+                {
+                    question: "Jika dua proyektil diluncurkan dengan kecepatan awal yang sama tetapi sudut elevasi berbeda (30° dan 60°), maka jangkauan horizontalnya akan sama.",
+                    answer: true,
+                    explanation: "Benar! Sudut 30° dan 60° adalah sudut komplementer. Karena sin(2×30°) = sin 60° = sin(2×60°) = sin 120° = sin 60°, maka jangkauannya sama."
+                },
+                {
+                    question: "Massa proyektil mempengaruhi bentuk lintasan parabola yang dihasilkan.",
+                    answer: false,
+                    explanation: "Salah! Dalam medan gravitasi seragam dan tanpa hambatan udara, massa tidak mempengaruhi lintasan. Semua benda jatuh dengan percepatan yang sama."
+                },
+                {
+                    question: "Pada gerak parabola, kecepatan total proyektil mencapai nilai minimum di titik tertinggi lintasan.",
+                    answer: true,
+                    explanation: "Benar! Di titik tertinggi, kecepatan vertikal = 0, sehingga kecepatan total = kecepatan horizontal saja, yang merupakan nilai minimum sepanjang lintasan."
+                },
+                {
+                    question: "Jika hambatan udara diabaikan, maka lintasan gerak parabola akan selalu simetris terhadap garis vertikal yang melalui titik tertinggi.",
+                    answer: true,
+                    explanation: "Benar! Tanpa hambatan udara, lintasan parabola bersifat simetris. Bagian naik dan turun memiliki bentuk yang sama terhadap garis vertikal di puncak."
+                }
+            ];
+            
+            let currentQuestion = 0;
+            let score = 0;
+            let answered = 0;
+            
+            const quizOptions = document.querySelectorAll('.quiz-option');
+            
+            quizOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const questionDiv = e.target.closest('.quiz-question');
+                    const questionNumber = parseInt(questionDiv.getAttribute('data-question')) - 1;
+                    const userAnswer = e.target.getAttribute('data-answer') === 'true';
+                    const correctAnswer = quizQuestions[questionNumber].answer;
+                    const feedback = questionDiv.querySelector('.quiz-feedback');
+                    
+                    // Disable all options for this question
+                    const questionOptions = questionDiv.querySelectorAll('.quiz-option');
+                    questionOptions.forEach(opt => {
+                        opt.disabled = true;
+                        opt.classList.add('opacity-50', 'cursor-not-allowed');
+                    });
+                    
+                    // Show feedback
+                    if (feedback) {
+                        feedback.classList.remove('hidden');
+                        if (userAnswer === correctAnswer) {
+                            feedback.className = 'quiz-feedback mt-4 p-3 rounded-lg bg-green-100 border border-green-300';
+                            feedback.innerHTML = `<p class="text-green-800 font-semibold">✅ Benar!</p><p class="text-green-700 text-sm mt-1">${quizQuestions[questionNumber].explanation}</p>`;
+                            score++;
+                        } else {
+                            feedback.className = 'quiz-feedback mt-4 p-3 rounded-lg bg-red-100 border border-red-300';
+                            feedback.innerHTML = `<p class="text-red-800 font-semibold">❌ Salah!</p><p class="text-red-700 text-sm mt-1">${quizQuestions[questionNumber].explanation}</p>`;
+                        }
+                    }
+                    
+                    answered++;
+                    updateQuizProgress();
+                    
+                    // Check if quiz is complete
+                    if (answered === quizQuestions.length) {
+                        setTimeout(() => {
+                            showQuizResults();
+                        }, 1000);
+                    }
+                });
+            });
+            
+            function updateQuizProgress() {
+                const progressBar = document.getElementById('quiz-progress-bar');
+                const progressText = document.getElementById('quiz-progress');
+                
+                const percentage = (answered / quizQuestions.length) * 100;
+                
+                if (progressBar) progressBar.style.width = percentage + '%';
+                if (progressText) progressText.textContent = `${answered}/${quizQuestions.length}`;
+            }
+            
+            function showQuizResults() {
+                const percentage = Math.round((score / quizQuestions.length) * 100);
+                let message = '';
+                let bgColor = '';
+                
+                if (percentage >= 80) {
+                    message = `🎉 Luar biasa! Anda mendapat ${score}/${quizQuestions.length} (${percentage}%). Pemahaman Anda tentang gerak parabola sangat baik!`;
+                    bgColor = 'bg-green-100 border-green-300 text-green-800';
+                } else if (percentage >= 60) {
+                    message = `👍 Bagus! Anda mendapat ${score}/${quizQuestions.length} (${percentage}%). Terus belajar untuk meningkatkan pemahaman!`;
+                    bgColor = 'bg-yellow-100 border-yellow-300 text-yellow-800';
+                } else {
+                    message = `📚 Anda mendapat ${score}/${quizQuestions.length} (${percentage}%). Mari pelajari kembali materi gerak parabola!`;
+                    bgColor = 'bg-red-100 border-red-300 text-red-800';
+                }
+                
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `mt-8 p-6 rounded-lg border-2 ${bgColor}`;
+                resultDiv.innerHTML = `
+                    <h3 class="text-xl font-bold mb-3">Hasil Kuis</h3>
+                    <p class="text-lg">${message}</p>
+                    <button onclick="location.reload()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+                        🔄 Ulangi Kuis
+                    </button>
+                `;
+                
+                const quizContainer = document.getElementById('quiz-container');
+                if (quizContainer) {
+                    quizContainer.appendChild(resultDiv);
+                }
+                
+                // Mark quiz tab as completed
+                const quizTab = document.querySelector('[data-tab="kuis"]');
+                if (quizTab && percentage >= 60) {
+                    quizTab.classList.add('completed');
+                    updateProgress();
+                }
+            }
+        }
+        
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTabs();
+            initializeAnimations();
+            initializeSimulation();
+            initializeFlashCards();
+            initializeProblemSlides();
+            initializeQuiz();
+        });
+        
+        // Make flipCard function global for onclick handlers
+        window.flipCard = flipCard;
+    </script>
+  <div class="container mx-auto px-4 py-8"><!-- Header -->
+   <header class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">Gerak Parabola</h1>
+    <p class="text-lg text-gray-600">Pembelajaran Interaktif Fisika</p><!-- Progress Bar -->
+    <div class="mt-6 max-w-2xl mx-auto">
+     <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">Progress Pembelajaran</span> <span id="progress-percentage" class="text-sm font-medium text-blue-600">0%</span>
+     </div>
+     <div class="w-full bg-gray-200 rounded-full h-3">
+      <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+     </div>
+     <div class="flex justify-between mt-2 text-xs text-gray-500"><span>Mulai</span> <span id="progress-status">Belum dimulai</span> <span>Selesai</span>
+     </div>
+    </div><!-- Achievement Badge (Hidden initially) -->
+    <div id="achievement-badge" class="hidden mt-6 p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg shadow-lg max-w-md mx-auto">
+     <div class="flex items-center justify-center space-x-3"><span class="text-3xl">🏆</span>
+      <div class="text-white">
+       <h3 class="font-bold text-lg">Selamat!</h3>
+       <p class="text-sm">Anda telah menyelesaikan semua materi Gerak Parabola!</p>
+      </div>
+     </div>
+    </div>
+   </header><!-- Navigation Tabs -->
+   <nav class="mb-8">
+    <div class="flex flex-wrap justify-center gap-2"><button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent active" data-tab="konsep"> <span class="tab-number">1</span> Konsep Dasar </button> <button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent" data-tab="materi"> <span class="tab-number">2</span> Materi </button> <button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent" data-tab="pendalaman"> <span class="tab-number">3</span> Pendalaman </button> <button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent" data-tab="simulasi"> <span class="tab-number">4</span> Simulasi </button> <button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent" data-tab="flashcard"> <span class="tab-number">5</span> Flash Card </button> <button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent" data-tab="pembahasan-soal"> <span class="tab-number">6</span> Pembahasan Soal </button> <button class="tab-button px-6 py-3 rounded-lg font-medium border-2 border-transparent" data-tab="kuis"> <span class="tab-number">7</span> Kuis </button>
+    </div>
+   </nav><!-- Tab Content -->
+   <main><!-- Konsep Dasar Tab -->
+    <section id="konsep" class="tab-content">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Konsep Dasar Gerak Parabola</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+       <div>
+        <h3 class="text-xl font-semibold text-blue-600 mb-4">Apa itu Gerak Parabola?</h3>
+        <p class="text-gray-700 mb-4 text-lg leading-relaxed"><strong>Gerak parabola</strong> adalah gerakan benda yang dilempar ke udara dengan sudut tertentu. Benda akan bergerak membentuk lengkungan seperti huruf U terbalik yang disebut <em>parabola</em>.</p>
+        <h4 class="text-lg font-semibold text-gray-800 mb-3">Karakteristik Utama:</h4>
+        <ul class="list-disc list-inside text-gray-700 space-y-3 text-base leading-relaxed">
+         <li><strong>Arah Horizontal (kiri-kanan):</strong> Benda bergerak dengan kecepatan tetap</li>
+         <li><strong>Arah Vertikal (atas-bawah):</strong> Benda diperlambat oleh gravitasi saat naik, dipercepat saat turun</li>
+         <li><strong>Gaya Gravitasi:</strong> Hanya menarik benda ke bawah, tidak mempengaruhi gerakan horizontal</li>
+         <li><strong>Bentuk Lintasan:</strong> Melengkung seperti huruf U terbalik (parabola)</li>
+        </ul>
+       </div>
+       <div class="bg-blue-50 p-6 rounded-lg">
+        <h4 class="text-lg font-semibold text-blue-800 mb-4">Contoh dalam Kehidupan:</h4>
+        <div class="space-y-3">
+         <div class="flex items-center space-x-3"><span class="text-2xl">⚽</span> <span class="text-gray-700">Tendangan bola sepak</span>
+         </div>
+         <div class="flex items-center space-x-3"><span class="text-2xl">🏀</span> <span class="text-gray-700">Lemparan bola basket</span>
+         </div>
+         <div class="flex items-center space-x-3"><span class="text-2xl">💧</span> <span class="text-gray-700">Semprotan air</span>
+         </div>
+         <div class="flex items-center space-x-3"><span class="text-2xl">🎯</span> <span class="text-gray-700">Panahan</span>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="mt-8 p-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+       <h4 class="text-lg font-semibold text-yellow-800 mb-2">💡 Poin Penting</h4>
+       <p class="text-yellow-700 text-base leading-relaxed"><strong>Ingat!</strong> Gerak parabola sebenarnya adalah gabungan dari dua gerakan yang terjadi bersamaan: <br>
+        • <strong>Horizontal:</strong> Bergerak lurus dengan kecepatan tetap <br>
+        • <strong>Vertikal:</strong> Bergerak naik-turun karena pengaruh gravitasi</p>
+      </div>
+     </div>
+    </section><!-- Materi Tab -->
+    <section id="materi" class="tab-content hidden">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Analisis Gerak Parabola</h2>
+      <div class="mb-8">
+       <h3 class="text-2xl font-semibold text-blue-600 mb-6 text-center">Analisis Berdasarkan Komponen</h3>
+       <div class="grid lg:grid-cols-2 gap-8"><!-- Komponen Horizontal (Sumbu X) -->
+        <div class="component-analysis glb-section">
+         <h4 class="text-xl font-bold text-green-800 mb-4 flex items-center"><span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">X</span> Komponen Horizontal (Sumbu X)</h4>
+         <div class="mb-4">
+          <h5 class="text-lg font-semibold text-green-700 mb-2">Jenis Gerak: GLB (Gerak Lurus Beraturan)</h5>
+          <p class="text-gray-700 mb-3 text-base leading-relaxed"><strong>Bayangkan seperti ini:</strong> Ketika Anda melempar bola ke samping, bola akan terus bergerak ke samping dengan kecepatan yang sama. Gravitasi tidak mempengaruhi gerakan ke samping, hanya gerakan naik-turun saja.</p>
+          <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+           <p class="text-green-800 text-sm font-medium">✅ <strong>Kesimpulan:</strong> Kecepatan horizontal selalu sama dari awal sampai akhir</p>
+          </div>
+          <div class="experiment-card mt-4">
+           <h6 class="font-bold text-amber-800 mb-3 flex items-center">🔬 Eksperimen GLB</h6>
+           <p class="text-amber-700 mb-3 text-sm">Tonton video eksperimen berikut untuk memahami gerak GLB pada komponen horizontal:</p>
+           <div class="mb-3"><a href="https://drive.google.com/file/u/1/d/1lZ1sL4gACFjYe6RnITCksZOteGm90UYm/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"> 🎥 Tonton Video Eksperimen GLB </a>
+           </div>
+           <p class="text-xs text-amber-600">Video menunjukkan bahwa komponen horizontal bergerak dengan kecepatan konstan</p>
+          </div>
+         </div>
+         <div class="formula-box mb-4">
+          <h6 class="font-semibold text-blue-800 mb-2">Rumus untuk Gerakan Horizontal:</h6>
+          <div class="space-y-2 text-sm">
+           <p><strong>Kecepatan:</strong> v<sub>x</sub> = v<sub>0x</sub> = tetap sama</p>
+           <p><strong>Jarak:</strong> x = kecepatan × waktu</p>
+           <p><strong>Percepatan:</strong> a<sub>x</sub> = 0 (tidak ada)</p>
+          </div>
+         </div><!-- Ilustrasi Vektor Kecepatan Horizontal -->
+         <div class="bg-white p-4 rounded-lg border-2 border-green-200 mb-4">
+          <h6 class="font-bold text-green-800 mb-3 text-center">📊 Ilustrasi Vektor Kecepatan Horizontal (Animasi)</h6>
+          <div class="bg-gradient-to-b from-sky-100 to-green-100 p-4 rounded-lg">
+           <svg id="animated-trajectory" width="100%" height="250" viewbox="0 0 400 200" class="border border-gray-300 rounded"><!-- Background grid --> <defs>
+             <pattern id="grid" width="20" height="20" patternunits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+             </pattern>
+             <marker id="arrow" markerwidth="5" markerheight="4" refx="4" refy="2" orient="auto" markerunits="strokeWidth">
+              <path d="M0,0 L0,4 L5,2 z" fill="#059669" />
+             </marker>
+            </defs> <rect width="100%" height="100%" fill="url(#grid)" /> <!-- Ground --> <rect x="0" y="180" width="400" height="20" fill="#8b5cf6" opacity="0.3" /> <!-- Perfect parabolic trajectory path (animated dashes) --> <path id="animated-path" d="M 50 180 Q 200 80 350 180" stroke="#ef4444" stroke-width="3" fill="none" stroke-dasharray="8,4" stroke-dashoffset="0">
+             <animate attributename="stroke-dashoffset" values="0;-12" dur="0.6s" repeatcount="indefinite" />
+            </path> <!-- Moving projectile --> <circle id="moving-projectile" r="7" fill="#fbbf24" stroke="#f59e0b" stroke-width="2">
+             <animatemotion dur="4s" repeatcount="indefinite">
+              <mpath href="#trajectory-motion-path" />
+             </animatemotion>
+            </circle> <!-- Perfect parabolic path for motion --> <path id="trajectory-motion-path" d="M 50 180 Q 200 80 350 180" fill="none" opacity="0" /> <!-- Horizontal velocity vector that follows projectile --> <g id="velocity-vector">
+             <line id="velocity-line" stroke="#059669" stroke-width="4" marker-end="url(#arrow)" x1="0" y1="0" x2="45" y2="0" />
+             <animatemotion dur="4s" repeatcount="indefinite">
+              <mpath href="#trajectory-motion-path" />
+             </animatemotion>
+            </g> <!-- Initial angle indicator --> <path d="M 50 180 L 80 180 A 30 30 0 0 0 65 155" stroke="#374151" stroke-width="2" fill="none" /> <text x="62" y="162" class="text-sm fill-current text-gray-800 font-bold">
+             α
+            </text> <!-- Control button --> <!-- Control button --> <g transform="translate(330, 10)">
+             <rect id="play-pause-btn" x="0" y="0" width="60" height="25" rx="12" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1" cursor="pointer" opacity="0.9" />
+             <text id="play-pause-text" x="30" y="17" text-anchor="middle" class="text-xs fill-white font-semibold cursor-pointer">
+              ⏸ Pause
+             </text>
+            </g>
+           </svg>
+          </div>
+          <p class="text-xs text-green-600 mt-2 text-center"><strong>Animasi:</strong> proyektil memiliki kecepatan arah horizontal yang selalu konstan</p>
+         </div>
+        </div><!-- Komponen Vertikal (Sumbu Y) -->
+        <div class="component-analysis glbb-section">
+         <h4 class="text-xl font-bold text-red-800 mb-4 flex items-center"><span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">Y</span> Komponen Vertikal (Sumbu Y)</h4>
+         <div class="mb-4">
+          <h5 class="text-lg font-semibold text-red-700 mb-2">Jenis Gerak: GLBB (Gerak Lurus Berubah Beraturan)</h5>
+          <p class="text-gray-700 mb-3 text-base leading-relaxed"><strong>Bayangkan seperti ini:</strong> Ketika Anda melempar bola ke atas, bola akan melambat saat naik (karena gravitasi menarik ke bawah), berhenti sejenak di titik tertinggi, lalu bergerak semakin cepat saat turun.</p>
+          <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+           <p class="text-red-800 text-sm font-medium">⚠️ <strong>Kesimpulan:</strong> Kecepatan vertikal selalu berubah karena pengaruh gravitasi</p>
+          </div>
+          <div class="experiment-card mt-4">
+           <h6 class="font-bold text-amber-800 mb-3 flex items-center">🔬 Eksperimen GLBB</h6>
+           <p class="text-amber-700 mb-3 text-sm">Tonton video eksperimen berikut untuk memahami gerak GLBB pada komponen vertikal:</p>
+           <div class="mb-3"><a href="https://drive.google.com/file/d/1GMR7BzFnKBd65mb5Wdb-KdHuKMtXHXQt/view" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"> 🎥 Tonton Video Eksperimen GLBB </a>
+           </div>
+           <p class="text-xs text-amber-600">Video menunjukkan pengaruh gravitasi terhadap komponen vertikal</p>
+          </div>
+         </div>
+         <div class="formula-box mb-4">
+          <h6 class="font-semibold text-blue-800 mb-2">Rumus untuk Gerakan Vertikal:</h6>
+          <div class="space-y-2 text-sm">
+           <p><strong>Kecepatan:</strong> v<sub>y</sub> = kecepatan awal - (gravitasi × waktu)</p>
+           <p><strong>Ketinggian:</strong> y = (kecepatan awal × waktu) - ½ × gravitasi × waktu²</p>
+           <p><strong>Percepatan:</strong> a<sub>y</sub> = -g</p>
+          </div>
+         </div><!-- Ilustrasi Vektor Kecepatan Vertikal -->
+         <div class="bg-white p-4 rounded-lg border-2 border-red-200 mb-4">
+          <h6 class="font-bold text-red-800 mb-3 text-center">📊 Ilustrasi Vektor Kecepatan Vertikal (Animasi)</h6>
+          <div class="bg-gradient-to-b from-sky-100 to-red-100 p-4 rounded-lg">
+           <svg id="vertical-trajectory" width="100%" height="320" viewbox="0 0 500 280" class="border border-gray-300 rounded"><!-- Background grid --> <defs>
+             <pattern id="grid-vertical" width="20" height="20" patternunits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+             </pattern>
+             <marker id="arrow-vertical-up" markerwidth="8" markerheight="6" refx="4" refy="3" orient="auto" markerunits="strokeWidth">
+              <path d="M0,0 L4,6 L8,0 z" fill="#dc2626" />
+             </marker>
+             <marker id="arrow-vertical-down" markerwidth="8" markerheight="6" refx="4" refy="3" orient="auto" markerunits="strokeWidth">
+              <path d="M0,0 L4,6 L8,0 z" fill="#dc2626" />
+             </marker>
+            </defs> <rect width="100%" height="100%" fill="url(#grid-vertical)" /> <!-- Ground --> <rect x="0" y="250" width="500" height="30" fill="#8b5cf6" opacity="0.3" /> <text x="10" y="270" class="text-sm fill-gray-700 font-semibold">
+             Tanah
+            </text> <!-- Parabolic trajectory path with realistic elevation angle --> <path id="vertical-animated-path" d="M 80 250 Q 250 120 420 250" stroke="#ef4444" stroke-width="3" fill="none" stroke-dasharray="8,4" stroke-dashoffset="0">
+             <animate attributename="stroke-dashoffset" values="0;-12" dur="1s" repeatcount="indefinite" />
+            </path> <!-- Moving projectile with enhanced visibility --> <circle id="vertical-moving-projectile" r="10" fill="#fbbf24" stroke="#f59e0b" stroke-width="3">
+             <animatemotion dur="6s" repeatcount="indefinite">
+              <mpath href="#vertical-trajectory-motion-path" />
+             </animatemotion>
+            </circle> <!-- Motion path (invisible) --> <path id="vertical-trajectory-motion-path" d="M 80 250 Q 250 120 420 250" fill="none" opacity="0" /> <!-- Vertical velocity vector that changes dynamically --> <g id="vertical-velocity-vector">
+             <line id="vertical-velocity-line" stroke="#dc2626" stroke-width="5" opacity="1" x1="0" y1="0" x2="0" y2="-30" />
+             <animatemotion dur="6s" repeatcount="indefinite">
+              <mpath href="#vertical-trajectory-motion-path" />
+             </animatemotion>
+            </g> <!-- Initial angle indicator with better visibility --> <path d="M 80 250 L 120 250 A 40 40 0 0 0 95 215" stroke="#374151" stroke-width="3" fill="none" /> <text x="100" y="235" class="text-base fill-current text-gray-800 font-bold">
+             α = 45°
+            </text> <!-- Launch point indicator --> <circle cx="80" cy="250" r="4" fill="#374151" /> <text x="60" y="270" class="text-sm fill-gray-700 font-semibold">
+             Start
+            </text> <!-- Peak point indicator --> <circle cx="250" cy="120" r="4" fill="#7c3aed" /> <text x="230" y="110" class="text-sm fill-purple-700 font-semibold">
+             Puncak
+            </text> <text x="225" y="100" class="text-xs fill-purple-600">
+             (vᵧ = 0)
+            </text> <!-- Landing point indicator --> <circle cx="420" cy="250" r="4" fill="#374151" /> <text x="400" y="270" class="text-sm fill-gray-700 font-semibold">
+             Landing
+            </text> <!-- Status indicator with enhanced information --> <g transform="translate(10, 10)">
+             <rect x="0" y="0" width="200" height="80" fill="white" stroke="#d1d5db" stroke-width="2" rx="8" opacity="0.95" />
+             <text x="100" y="20" text-anchor="middle" class="text-sm fill-gray-800 font-bold">
+              Status Gerakan Vertikal:
+             </text>
+             <text id="motion-phase" x="100" y="38" text-anchor="middle" class="text-base fill-red-700 font-bold">
+              Naik (melambat)
+             </text>
+             <text id="velocity-magnitude" x="100" y="55" text-anchor="middle" class="text-sm fill-gray-600">
+              vᵧ = +15.0 m/s
+             </text>
+             <text x="100" y="70" text-anchor="middle" class="text-xs fill-gray-500">
+              Gravitasi: g = -9.8 m/s²
+             </text>
+            </g> <!-- Phase indicators along trajectory --> <g transform="translate(350, 180)">
+             <rect x="0" y="0" width="140" height="90" fill="white" stroke="#d1d5db" stroke-width="1" rx="6" opacity="0.9" />
+             <text x="70" y="15" text-anchor="middle" class="text-sm fill-gray-800 font-bold">
+              Fase Gerakan:
+             </text>
+             <circle cx="15" cy="30" r="3" fill="#10b981" />
+             <text x="25" y="35" class="text-xs fill-gray-700">
+              Naik: vᵧ &gt; 0 (melambat)
+             </text>
+             <circle cx="15" cy="50" r="3" fill="#7c3aed" />
+             <text x="25" y="55" class="text-xs fill-gray-700">
+              Puncak: vᵧ = 0
+             </text>
+             <circle cx="15" cy="70" r="3" fill="#ef4444" />
+             <text x="25" y="75" class="text-xs fill-gray-700">
+              Turun: vᵧ &lt; 0 (mempercepat)
+             </text>
+            </g> <!-- Control button --> <g transform="translate(420, 10)">
+             <rect id="vertical-play-pause-btn" x="0" y="0" width="70" height="30" rx="15" fill="#dc2626" stroke="#b91c1c" stroke-width="2" cursor="pointer" opacity="0.9" />
+             <text id="vertical-play-pause-text" x="35" y="20" text-anchor="middle" class="text-sm fill-white font-bold cursor-pointer">
+              ⏸ Pause
+             </text>
+            </g>
+           </svg>
+          </div>
+          <p class="text-sm text-red-600 mt-3 text-center leading-relaxed"><strong>Animasi menunjukkan:</strong> Proyektil bergerak dalam lintasan parabola dengan vektor kecepatan vertikal (vᵧ) yang <strong>memendek saat naik</strong> (melambat karena gravitasi), <strong>hilang di puncak</strong> (vᵧ = 0), dan <strong>memanjang saat turun</strong> (mempercepat karena gravitasi).</p>
+          <div class="mt-4 grid md:grid-cols-3 gap-3 text-sm">
+           <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+            <h6 class="font-bold text-green-800 mb-1 flex items-center"><span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span> Fase Naik</h6>
+            <p class="text-green-700 text-xs">vᵧ &gt; 0, vektor memendek (melambat)</p>
+           </div>
+           <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+            <h6 class="font-bold text-purple-800 mb-1 flex items-center"><span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span> Puncak</h6>
+            <p class="text-purple-700 text-xs">vᵧ = 0, vektor hilang</p>
+           </div>
+           <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+            <h6 class="font-bold text-red-800 mb-1 flex items-center"><span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span> Fase Turun</h6>
+            <p class="text-red-700 text-xs">vᵧ &lt; 0, vektor memanjang (mempercepat)</p>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div><!-- Ilustrasi Penjumlahan Vektor Kecepatan Total -->
+       <div class="mt-8 bg-white p-6 rounded-lg border-2 border-purple-200">
+        <h4 class="text-xl font-bold text-purple-800 mb-4 text-center">🎯 Penjumlahan Vektor Kecepatan Total</h4>
+        <p class="text-gray-700 mb-4 text-center text-base leading-relaxed"><strong>Kecepatan total proyektil</strong> adalah hasil penjumlahan vektor kecepatan horizontal (vₓ) dan vertikal (vᵧ)</p>
+        <div class="bg-gradient-to-b from-purple-50 to-blue-50 p-4 rounded-lg">
+         <svg id="vector-sum-trajectory" width="100%" height="300" viewbox="0 0 450 250" class="border border-gray-300 rounded"><!-- Background grid --> <defs>
+           <pattern id="grid-vector-sum" width="20" height="20" patternunits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+           </pattern>
+           <marker id="arrow-vx" markerwidth="4" markerheight="3" refx="3" refy="1.5" orient="auto" markerunits="strokeWidth">
+            <path d="M0,0 L0,3 L4,1.5 z" fill="#059669" />
+           </marker>
+           <marker id="arrow-vy" markerwidth="4" markerheight="3" refx="3" refy="1.5" orient="auto" markerunits="strokeWidth">
+            <path d="M0,0 L0,3 L4,1.5 z" fill="#dc2626" />
+           </marker>
+           <marker id="arrow-vtotal" markerwidth="5" markerheight="4" refx="4" refy="2" orient="auto" markerunits="strokeWidth">
+            <path d="M0,0 L0,4 L5,2 z" fill="#7c3aed" />
+           </marker>
+          </defs> <rect width="100%" height="100%" fill="url(#grid-vector-sum)" /> <!-- Ground --> <rect x="0" y="230" width="450" height="20" fill="#8b5cf6" opacity="0.3" /> <!-- Parabolic trajectory path --> <path id="vector-sum-path" d="M 50 230 Q 225 100 400 230" stroke="#6366f1" stroke-width="3" fill="none" stroke-dasharray="6,3" stroke-dashoffset="0">
+           <animate attributename="stroke-dashoffset" values="0;-9" dur="0.8s" repeatcount="indefinite" />
+          </path> <!-- Moving projectile --> <circle id="vector-sum-projectile" r="8" fill="#fbbf24" stroke="#f59e0b" stroke-width="2">
+           <animatemotion dur="5s" repeatcount="indefinite">
+            <mpath href="#vector-sum-motion-path" />
+           </animatemotion>
+          </circle> <!-- Motion path (invisible) --> <path id="vector-sum-motion-path" d="M 50 230 Q 225 100 400 230" fill="none" opacity="0" /> <!-- Horizontal velocity vector (vx) - constant --> <g id="vx-vector">
+           <line id="vx-line" stroke="#059669" stroke-width="4" marker-end="url(#arrow-vx)" x1="0" y1="0" x2="50" y2="0" />
+           <text id="vx-label" x="25" y="-8" text-anchor="middle" class="text-sm fill-green-700 font-bold">
+            vₓ
+           </text>
+           <animatemotion dur="5s" repeatcount="indefinite">
+            <mpath href="#vector-sum-motion-path" />
+           </animatemotion>
+          </g> <!-- Vertical velocity vector (vy) - changing --> <g id="vy-vector">
+           <line id="vy-line" stroke="#dc2626" stroke-width="4" marker-end="url(#arrow-vy)" />
+           <text id="vy-label" text-anchor="middle" class="text-sm fill-red-700 font-bold">
+            vᵧ
+           </text>
+           <animatemotion dur="5s" repeatcount="indefinite">
+            <mpath href="#vector-sum-motion-path" />
+           </animatemotion>
+          </g> <!-- Total velocity vector (vtotal) --> <g id="vtotal-vector">
+           <line id="vtotal-line" stroke="#7c3aed" stroke-width="5" marker-end="url(#arrow-vtotal)" />
+           <text id="vtotal-label" text-anchor="middle" class="text-sm fill-purple-700 font-bold">
+            v total
+           </text>
+           <animatemotion dur="5s" repeatcount="indefinite">
+            <mpath href="#vector-sum-motion-path" />
+           </animatemotion>
+          </g> <!-- Vector parallelogram (dashed lines) --> <g id="parallelogram">
+           <line id="parallel-line1" stroke="#9ca3af" stroke-width="2" stroke-dasharray="3,3" opacity="0.7" />
+           <line id="parallel-line2" stroke="#9ca3af" stroke-width="2" stroke-dasharray="3,3" opacity="0.7" />
+           <animatemotion dur="5s" repeatcount="indefinite">
+            <mpath href="#vector-sum-motion-path" />
+           </animatemotion>
+          </g> <!-- Initial angle indicator --> <path d="M 50 230 L 80 230 A 30 30 0 0 0 65 205" stroke="#374151" stroke-width="2" fill="none" /> <text x="67" y="217" class="text-sm fill-current text-gray-800 font-bold">
+           α
+          </text> <!-- Legend --> <g transform="translate(10, 10)">
+           <rect x="0" y="0" width="140" height="85" fill="white" stroke="#d1d5db" stroke-width="1" rx="5" opacity="0.95" />
+           <text x="70" y="15" text-anchor="middle" class="text-sm fill-gray-800 font-bold">
+            Legenda:
+           </text>
+           <line x1="10" y1="25" x2="30" y2="25" stroke="#059669" stroke-width="3" marker-end="url(#arrow-vx)" />
+           <text x="35" y="29" class="text-xs fill-gray-700">
+            vₓ (horizontal, konstan)
+           </text>
+           <line x1="10" y1="40" x2="30" y2="40" stroke="#dc2626" stroke-width="3" marker-end="url(#arrow-vy)" />
+           <text x="35" y="44" class="text-xs fill-gray-700">
+            vᵧ (vertikal, berubah)
+           </text>
+           <line x1="10" y1="55" x2="30" y2="55" stroke="#7c3aed" stroke-width="4" marker-end="url(#arrow-vtotal)" />
+           <text x="35" y="59" class="text-xs fill-gray-700">
+            v total (resultan)
+           </text>
+           <line x1="10" y1="70" x2="30" y2="70" stroke="#9ca3af" stroke-width="2" stroke-dasharray="3,3" />
+           <text x="35" y="74" class="text-xs fill-gray-700">
+            garis bantu
+           </text>
+          </g> <!-- Control button --> <g transform="translate(380, 10)">
+           <rect id="vector-sum-play-pause-btn" x="0" y="0" width="60" height="25" rx="12" fill="#7c3aed" stroke="#6d28d9" stroke-width="1" cursor="pointer" opacity="0.9" />
+           <text id="vector-sum-play-pause-text" x="30" y="17" text-anchor="middle" class="text-xs fill-white font-semibold cursor-pointer">
+            ⏸ Pause
+           </text>
+          </g>
+         </svg>
+        </div>
+        <div class="mt-4 grid md:grid-cols-3 gap-4 text-sm">
+         <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+          <h6 class="font-bold text-green-800 mb-2 flex items-center"><span class="w-4 h-1 bg-green-600 mr-2"></span> Vektor vₓ (Hijau)</h6>
+          <p class="text-green-700 text-xs">Kecepatan horizontal yang <strong>selalu konstan</strong> sepanjang lintasan</p>
+         </div>
+         <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+          <h6 class="font-bold text-red-800 mb-2 flex items-center"><span class="w-4 h-1 bg-red-600 mr-2"></span> Vektor vᵧ (Merah)</h6>
+          <p class="text-red-700 text-xs">Kecepatan vertikal yang <strong>berubah-ubah</strong> karena gravitasi</p>
+         </div>
+         <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+          <h6 class="font-bold text-purple-800 mb-2 flex items-center"><span class="w-4 h-1 bg-purple-600 mr-2"></span> Vektor v total (Ungu)</h6>
+          <p class="text-purple-700 text-xs">Hasil penjumlahan vₓ dan vᵧ menggunakan <strong>aturan jajargenjang</strong></p>
+         </div>
+        </div>
+        <div class="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+         <h6 class="font-bold text-blue-800 mb-2">📐 Rumus Penjumlahan Vektor:</h6>
+         <div class="text-blue-700 text-sm space-y-1">
+          <p><strong>Besar kecepatan total:</strong> |v| = √(vₓ² + vᵧ²)</p>
+          <p><strong>Arah kecepatan total:</strong> θ = arctan(vᵧ/vₓ)</p>
+          <p class="text-xs mt-2 text-blue-600"><strong>Perhatikan:</strong> Vektor v total selalu menunjuk ke arah gerak proyektil (menyinggung lintasan parabola)</p>
+         </div>
+        </div>
+       </div><!-- Kesimpulan -->
+       <div class="mt-8 p-6 bg-indigo-50 border-2 border-indigo-200 rounded-lg">
+        <h4 class="text-lg font-bold text-indigo-800 mb-4">📝 Ringkasan Penting</h4>
+        <div class="grid md:grid-cols-2 gap-6">
+         <div class="bg-white p-4 rounded-lg border border-green-200">
+          <h5 class="font-semibold text-green-700 mb-3 flex items-center"><span class="bg-green-100 p-2 rounded-full mr-2">➡️</span> Gerakan Horizontal (Kiri-Kanan)</h5>
+          <ul class="text-sm text-gray-700 space-y-2 leading-relaxed">
+           <li>✅ <strong>Kecepatan tetap</strong> - tidak berubah</li>
+           <li>✅ <strong>Tidak ada percepatan</strong> - gravitasi tidak mempengaruhi</li>
+           <li>✅ <strong>Mudah dihitung:</strong> Jarak = Kecepatan × Waktu</li>
+          </ul>
+         </div>
+         <div class="bg-white p-4 rounded-lg border border-red-200">
+          <h5 class="font-semibold text-red-700 mb-3 flex items-center"><span class="bg-red-100 p-2 rounded-full mr-2">⬆️⬇️</span> Gerakan Vertikal (Atas-Bawah)</h5>
+          <ul class="text-sm text-gray-700 space-y-2 leading-relaxed">
+           <li>⚠️ <strong>Kecepatan berubah</strong> - diperlambat saat naik, dipercepat saat turun</li>
+           <li>⚠️ <strong>Ada percepatan gravitasi</strong> - selalu menarik ke bawah</li>
+           <li>⚠️ <strong>Perhitungan lebih kompleks</strong> - menggunakan rumus khusus</li>
+          </ul>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- Pendalaman Rumus Tab -->
+    <section id="pendalaman" class="tab-content hidden">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Penurunan Rumus Gerak Parabola</h2>
+      <p class="text-gray-600 mb-8 text-center">Mari kita turunkan rumus-rumus penting dalam gerak parabola secara matematis</p><!-- Persamaan Dasar -->
+      <div class="mb-8">
+       <h3 class="text-2xl font-semibold text-purple-600 mb-6">📐 Persamaan Dasar Gerak Parabola</h3>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          1
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-purple-800 mb-3">Komponen Kecepatan Awal</h4>
+          <p class="text-gray-700 mb-4">Proyektil dilempar dengan kecepatan awal <strong>v₀</strong> pada sudut <strong>θ</strong> terhadap horizontal. Kecepatan awal ini dapat diuraikan menjadi dua komponen:</p><!-- Ilustrasi Komponen Kecepatan Awal -->
+          <div class="bg-white p-6 rounded-lg border-2 border-purple-200 mb-6">
+           <h5 class="font-bold text-purple-800 mb-4 text-center">📐 Ilustrasi Penguraian Vektor Kecepatan Awal</h5>
+           <div class="bg-gradient-to-b from-purple-50 to-blue-50 p-4 rounded-lg">
+            <svg width="100%" height="350" viewbox="0 0 500 300" class="border border-gray-300 rounded"><!-- Background grid --> <defs>
+              <pattern id="grid-velocity" width="20" height="20" patternunits="userSpaceOnUse">
+               <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+              </pattern> <!-- Arrow markers -->
+              <marker id="arrow-v0" markerwidth="8" markerheight="6" refx="7" refy="3" orient="auto" markerunits="strokeWidth">
+               <path d="M0,0 L0,6 L8,3 z" fill="#7c3aed" />
+              </marker>
+              <marker id="arrow-v0x" markerwidth="6" markerheight="4" refx="5" refy="2" orient="auto" markerunits="strokeWidth">
+               <path d="M0,0 L0,4 L6,2 z" fill="#059669" />
+              </marker>
+              <marker id="arrow-v0y" markerwidth="6" markerheight="4" refx="5" refy="2" orient="auto" markerunits="strokeWidth">
+               <path d="M0,0 L0,4 L6,2 z" fill="#dc2626" />
+              </marker>
+             </defs> <rect width="100%" height="100%" fill="url(#grid-velocity)" /> <!-- Ground line --> <line x1="0" y1="250" x2="500" y2="250" stroke="#8b5cf6" stroke-width="3" opacity="0.7" /> <!-- Launch point --> <circle cx="100" cy="250" r="6" fill="#f59e0b" stroke="#d97706" stroke-width="2" /> <text x="85" y="270" class="text-sm fill-gray-700 font-semibold">
+              Titik Peluncuran
+             </text> <!-- Main velocity vector v₀ --> <line x1="100" y1="250" x2="250" y2="150" stroke="#7c3aed" stroke-width="5" marker-end="url(#arrow-v0)" /> <text x="180" y="190" class="text-lg fill-purple-700 font-bold">
+              v₀
+             </text> <!-- Horizontal component v₀ₓ --> <line x1="100" y1="250" x2="250" y2="250" stroke="#059669" stroke-width="4" marker-end="url(#arrow-v0x)" /> <text x="170" y="270" class="text-base fill-green-700 font-bold">
+              v₀ₓ = v₀ cos θ
+             </text> <!-- Vertical component v₀ᵧ --> <line x1="250" y1="250" x2="250" y2="150" stroke="#dc2626" stroke-width="4" marker-end="url(#arrow-v0y)" /> <text x="260" y="200" class="text-base fill-red-700 font-bold">
+              v₀ᵧ = v₀ sin θ
+             </text> <!-- Dashed lines for rectangle completion --> <line x1="100" y1="250" x2="100" y2="150" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4" opacity="0.7" /> <line x1="100" y1="150" x2="250" y2="150" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4,4" opacity="0.7" /> <!-- Angle arc --> <path d="M 130 250 A 30 30 0 0 0 120 235" stroke="#374151" stroke-width="2" fill="none" /> <text x="135" y="240" class="text-base fill-gray-800 font-bold">
+              θ
+             </text> <!-- Right angle indicator --> <path d="M 240 250 L 240 240 L 250 240" stroke="#374151" stroke-width="2" fill="none" /> <text x="225" y="235" class="text-sm fill-gray-600">
+              90°
+             </text> <!-- Coordinate axes --> <line x1="50" y1="280" x2="350" y2="280" stroke="#374151" stroke-width="2" marker-end="url(#arrow-v0x)" /> <text x="355" y="285" class="text-sm fill-gray-700 font-semibold">
+              X (horizontal)
+             </text> <line x1="50" y1="280" x2="50" y2="100" stroke="#374151" stroke-width="2" marker-end="url(#arrow-v0y)" /> <text x="15" y="95" class="text-sm fill-gray-700 font-semibold">
+              Y (vertikal)
+             </text> <!-- Labels and annotations --> <g transform="translate(320, 50)">
+              <rect x="0" y="0" width="170" height="120" fill="white" stroke="#d1d5db" stroke-width="1" rx="8" opacity="0.95" />
+              <text x="85" y="20" text-anchor="middle" class="text-sm fill-gray-800 font-bold">
+               Komponen Vektor:
+              </text>
+              <line x1="10" y1="35" x2="35" y2="35" stroke="#7c3aed" stroke-width="4" />
+              <text x="40" y="39" class="text-xs fill-gray-700">
+               v₀ = Kecepatan awal
+              </text>
+              <line x1="10" y1="55" x2="35" y2="55" stroke="#059669" stroke-width="3" />
+              <text x="40" y="59" class="text-xs fill-gray-700">
+               v₀ₓ = Komponen horizontal
+              </text>
+              <line x1="10" y1="75" x2="35" y2="75" stroke="#dc2626" stroke-width="3" />
+              <text x="40" y="79" class="text-xs fill-gray-700">
+               v₀ᵧ = Komponen vertikal
+              </text>
+              <text x="10" y="100" class="text-xs fill-gray-600">
+               θ = Sudut elevasi
+              </text>
+              <text x="10" y="115" class="text-xs fill-gray-600">
+               Segitiga siku-siku terbentuk
+              </text>
+             </g> <!-- Mathematical relationship indicators --> <g transform="translate(380, 180)">
+              <rect x="0" y="0" width="110" height="80" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="6" opacity="0.9" />
+              <text x="55" y="15" text-anchor="middle" class="text-xs fill-amber-800 font-bold">
+               Teorema Pythagoras:
+              </text>
+              <text x="55" y="30" text-anchor="middle" class="text-xs fill-amber-700">
+               v₀² = v₀ₓ² + v₀ᵧ²
+              </text>
+              <text x="55" y="50" text-anchor="middle" class="text-xs fill-amber-800 font-bold">
+               Trigonometri:
+              </text>
+              <text x="55" y="65" text-anchor="middle" class="text-xs fill-amber-700">
+               tan θ = v₀ᵧ/v₀ₓ
+              </text>
+             </g>
+            </svg>
+           </div>
+           <div class="mt-4 grid md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+             <h6 class="font-bold text-purple-800 mb-2 flex items-center"><span class="w-4 h-1 bg-purple-600 mr-2"></span> Vektor v₀ (Ungu)</h6>
+             <p class="text-purple-700 text-xs">Kecepatan awal total dengan besar v₀ dan arah θ terhadap horizontal</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+             <h6 class="font-bold text-green-800 mb-2 flex items-center"><span class="w-4 h-1 bg-green-600 mr-2"></span> Komponen v₀ₓ (Hijau)</h6>
+             <p class="text-green-700 text-xs">Proyeksi horizontal: v₀ₓ = v₀ cos θ (menggunakan cosinus)</p>
+            </div>
+            <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+             <h6 class="font-bold text-red-800 mb-2 flex items-center"><span class="w-4 h-1 bg-red-600 mr-2"></span> Komponen v₀ᵧ (Merah)</h6>
+             <p class="text-red-700 text-xs">Proyeksi vertikal: v₀ᵧ = v₀ sin θ (menggunakan sinus)</p>
+            </div>
+           </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+           <div class="math-equation"><strong>Komponen Horizontal:</strong><br>
+             v₀ₓ = v₀ cos θ
+           </div>
+           <div class="math-equation"><strong>Komponen Vertikal:</strong><br>
+             v₀ᵧ = v₀ sin θ
+           </div>
+          </div>
+          <div class="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+           <p class="text-purple-700 text-sm"><strong>💡 Ingat:</strong> Komponen horizontal tetap konstan sepanjang gerak, sedangkan komponen vertikal berubah karena pengaruh gravitasi.</p>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          2
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-purple-800 mb-3">Persamaan Gerak untuk Setiap Komponen</h4>
+          <div class="grid lg:grid-cols-2 gap-6">
+           <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h5 class="font-semibold text-green-800 mb-3">Arah Horizontal (GLB)</h5>
+            <div class="space-y-3">
+             <div class="math-equation">
+              vₓ = v₀ₓ = v₀ cos θ
+             </div>
+             <div class="math-equation">
+              x = v₀ₓ × t = v₀ cos θ × t
+             </div>
+            </div>
+            <p class="text-green-700 text-sm mt-3">Tidak ada percepatan horizontal (aₓ = 0)</p>
+           </div>
+           <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h5 class="font-semibold text-red-800 mb-3">Arah Vertikal (GLBB)</h5>
+            <div class="space-y-3">
+             <div class="math-equation">
+              vᵧ = v₀ᵧ - gt = v₀ sin θ - gt
+             </div>
+             <div class="math-equation">
+              y = v₀ᵧt - ½gt² = v₀ sin θ × t - ½gt²
+             </div>
+            </div>
+            <p class="text-red-700 text-sm mt-3">Ada percepatan gravitasi (aᵧ = -g = -9,8 m/s²)</p>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Penurunan Tinggi Maksimum -->
+      <div class="mb-8">
+       <h3 class="text-2xl font-semibold text-blue-600 mb-6">🏔️ Penurunan Rumus Tinggi Maksimum (h_max)</h3>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          1
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-blue-800 mb-3">Kondisi di Titik Tertinggi</h4>
+          <p class="text-gray-700 mb-4">Di titik tertinggi lintasan, kecepatan vertikal proyektil menjadi nol (vᵧ = 0). Kita gunakan persamaan kecepatan vertikal:</p>
+          <div class="math-equation">
+           vᵧ = v₀ sin θ - gt
+          </div>
+          <p class="text-gray-700 mt-4">Pada titik tertinggi: vᵧ = 0, sehingga:</p>
+          <div class="math-equation">
+           0 = v₀ sin θ - gt_max
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          2
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-blue-800 mb-3">Mencari Waktu untuk Mencapai Tinggi Maksimum</h4>
+          <p class="text-gray-700 mb-4">Dari persamaan di atas, kita dapat mencari waktu yang diperlukan untuk mencapai titik tertinggi:</p>
+          <div class="space-y-3">
+           <div class="math-equation">
+            gt_max = v₀ sin θ
+           </div>
+           <div class="math-equation">
+            t_max = (v₀ sin θ)/g
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          3
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-blue-800 mb-3">Menghitung Tinggi Maksimum</h4>
+          <p class="text-gray-700 mb-4">Substitusi t_max ke dalam persamaan posisi vertikal:</p>
+          <div class="space-y-3">
+           <div class="math-equation">
+            h_max = v₀ sin θ × t_max - ½g(t_max)²
+           </div>
+           <div class="math-equation">
+            h_max = v₀ sin θ × (v₀ sin θ)/g - ½g × [(v₀ sin θ)/g]²
+           </div>
+           <div class="math-equation">
+            h_max = (v₀² sin² θ)/g - ½g × (v₀² sin² θ)/g²
+           </div>
+           <div class="math-equation">
+            h_max = (v₀² sin² θ)/g - (v₀² sin² θ)/(2g)
+           </div>
+           <div class="math-equation">
+            h_max = (v₀² sin² θ)/(2g)
+           </div>
+          </div>
+          <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-lg">
+           <h5 class="font-bold text-blue-800 mb-2">🎯 Rumus Final Tinggi Maksimum:</h5>
+           <div class="math-equation text-xl font-bold">
+            h_max = (v₀² sin² θ)/(2g)
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Penurunan Jangkauan Maksimum -->
+      <div class="mb-8">
+       <h3 class="text-2xl font-semibold text-orange-600 mb-6">🎯 Penurunan Rumus Jangkauan Maksimum (R)</h3>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          1
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-orange-800 mb-3">Mencari Waktu Terbang Total</h4>
+          <p class="text-gray-700 mb-4">Proyektil kembali ke tanah ketika y = 0. Gunakan persamaan posisi vertikal:</p>
+          <div class="space-y-3">
+           <div class="math-equation">
+            y = v₀ sin θ × t - ½gt²
+           </div>
+           <div class="math-equation">
+            0 = v₀ sin θ × t - ½gt²
+           </div>
+           <div class="math-equation">
+            0 = t(v₀ sin θ - ½gt)
+           </div>
+          </div>
+          <p class="text-gray-700 mt-4">Solusi: t = 0 (saat diluncurkan) atau v₀ sin θ - ½gt = 0</p>
+          <div class="math-equation">
+           t_total = (2v₀ sin θ)/g
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          2
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-orange-800 mb-3">Menghitung Jangkauan</h4>
+          <p class="text-gray-700 mb-4">Jangkauan adalah jarak horizontal yang ditempuh selama waktu terbang total:</p>
+          <div class="space-y-3">
+           <div class="math-equation">
+            R = v₀ cos θ × t_total
+           </div>
+           <div class="math-equation">
+            R = v₀ cos θ × (2v₀ sin θ)/g
+           </div>
+           <div class="math-equation">
+            R = (2v₀² cos θ sin θ)/g
+           </div>
+          </div>
+          <p class="text-gray-700 mt-4">Menggunakan identitas trigonometri: 2 cos θ sin θ = sin 2θ</p>
+          <div class="math-equation">
+           R = (v₀² sin 2θ)/g
+          </div>
+          <div class="mt-6 p-4 bg-orange-100 border-2 border-orange-400 rounded-lg">
+           <h5 class="font-bold text-orange-800 mb-2">🎯 Rumus Final Jangkauan:</h5>
+           <div class="math-equation text-xl font-bold">
+            R = (v₀² sin 2θ)/g
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          3
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-orange-800 mb-3">Sudut untuk Jangkauan Maksimum</h4>
+          <p class="text-gray-700 mb-4">Untuk mencari sudut yang memberikan jangkauan maksimum, kita perlu memaksimalkan sin 2θ:</p>
+          <div class="space-y-3">
+           <div class="math-equation">
+            R = (v₀² sin 2θ)/g
+           </div>
+           <p class="text-gray-700 text-center">Nilai maksimum sin 2θ = 1, yang terjadi ketika 2θ = 90°</p>
+           <div class="math-equation">
+            θ = 45°
+           </div>
+           <div class="math-equation">
+            R_max = v₀²/g
+           </div>
+          </div>
+          <div class="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+           <p class="text-orange-700 text-sm"><strong>💡 Kesimpulan:</strong> Jangkauan maksimum dicapai pada sudut elevasi 45°</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Waktu Terbang -->
+      <div class="mb-8">
+       <h3 class="text-2xl font-semibold text-green-600 mb-6">⏱️ Penurunan Rumus Waktu Terbang</h3>
+       <div class="derivation-step">
+        <div class="flex items-start">
+         <div class="step-number">
+          1
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-bold text-green-800 mb-3">Analisis Simetri Gerak Parabola</h4>
+          <p class="text-gray-700 mb-4">Gerak parabola memiliki sifat simetris. Waktu untuk naik ke titik tertinggi sama dengan waktu untuk turun kembali ke tanah.</p>
+          <div class="grid md:grid-cols-2 gap-4">
+           <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h5 class="font-semibold text-green-800 mb-2">Waktu Naik</h5>
+            <div class="math-equation">
+             t_naik = (v₀ sin θ)/g
+            </div>
+           </div>
+           <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h5 class="font-semibold text-green-800 mb-2">Waktu Turun</h5>
+            <div class="math-equation">
+             t_turun = (v₀ sin θ)/g
+            </div>
+           </div>
+          </div>
+          <div class="mt-4">
+           <div class="math-equation">
+            t_total = t_naik + t_turun = 2 × (v₀ sin θ)/g
+           </div>
+          </div>
+          <div class="mt-6 p-4 bg-green-100 border-2 border-green-400 rounded-lg">
+           <h5 class="font-bold text-green-800 mb-2">🎯 Rumus Final Waktu Terbang:</h5>
+           <div class="math-equation text-xl font-bold">
+            t_total = (2v₀ sin θ)/g
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Ringkasan Rumus -->
+      <div class="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg">
+       <h3 class="text-xl font-bold text-purple-800 mb-6 text-center">📋 Ringkasan Rumus Gerak Parabola</h3>
+       <div class="grid lg:grid-cols-3 gap-6">
+        <div class="bg-white p-4 rounded-lg border border-blue-200 shadow-sm">
+         <h4 class="font-bold text-blue-800 mb-3 text-center">🏔️ Tinggi Maksimum</h4>
+         <div class="math-equation text-lg">
+          h_max = (v₀² sin² θ)/(2g)
+         </div>
+         <p class="text-xs text-blue-600 mt-2 text-center">Ketinggian tertinggi yang dicapai proyektil</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg border border-orange-200 shadow-sm">
+         <h4 class="font-bold text-orange-800 mb-3 text-center">🎯 Jangkauan</h4>
+         <div class="math-equation text-lg">
+          R = (v₀² sin 2θ)/g
+         </div>
+         <p class="text-xs text-orange-600 mt-2 text-center">Jarak horizontal maksimum yang ditempuh</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg border border-green-200 shadow-sm">
+         <h4 class="font-bold text-green-800 mb-3 text-center">⏱️ Waktu Terbang</h4>
+         <div class="math-equation text-lg">
+          t = (2v₀ sin θ)/g
+         </div>
+         <p class="text-xs text-green-600 mt-2 text-center">Total waktu proyektil di udara</p>
+        </div>
+       </div>
+       <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+        <h5 class="font-bold text-yellow-800 mb-2">🔑 Variabel Penting:</h5>
+        <div class="grid md:grid-cols-2 gap-4 text-sm text-yellow-700">
+         <div>
+          <p><strong>v₀</strong> = Kecepatan awal (m/s)</p>
+          <p><strong>θ</strong> = Sudut elevasi (derajat)</p>
+          <p><strong>g</strong> = Percepatan gravitasi (9,8 m/s²)</p>
+         </div>
+         <div>
+          <p><strong>v₀ₓ</strong> = v₀ cos θ (komponen horizontal)</p>
+          <p><strong>v₀ᵧ</strong> = v₀ sin θ (komponen vertikal)</p>
+          <p><strong>Sudut optimal</strong> = 45° (untuk jangkauan maksimum)</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- Simulasi Tab -->
+    <section id="simulasi" class="tab-content hidden">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Simulasi Interaktif</h2>
+      <div class="grid lg:grid-cols-2 gap-8"><!-- Controls -->
+       <div class="space-y-6">
+        <div><label class="block text-sm font-medium text-gray-700 mb-2">Kecepatan Awal (m/s)</label> <input type="range" id="velocity-slider" min="10" max="50" value="30" class="w-full"> <span id="velocity-value" class="text-sm text-gray-600">30 m/s</span>
+        </div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-2">Sudut Elevasi (°)</label> <input type="range" id="angle-slider" min="15" max="75" value="45" class="w-full"> <span id="angle-value" class="text-sm text-gray-600">45°</span>
+        </div>
+        <div class="flex space-x-4"><button id="start-btn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg"> ▶ Mulai </button> <button id="reset-btn" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg"> 🔄 Reset </button>
+        </div><!-- Results -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+         <h4 class="font-semibold text-gray-800 mb-3">Hasil Perhitungan:</h4>
+         <div class="space-y-2 text-sm">
+          <p>Tinggi Maksimum: <span id="max-height" class="font-mono">0</span> m</p>
+          <p>Jangkauan: <span id="range" class="font-mono">0</span> m</p>
+          <p>Waktu Terbang: <span id="flight-time" class="font-mono">0</span> s</p>
+         </div>
+        </div>
+       </div><!-- Simulation Canvas -->
+       <div class="bg-sky-100 rounded-lg p-4">
+        <svg id="simulation-canvas" width="100%" height="400" viewbox="0 0 500 300" class="border border-gray-300 rounded bg-gradient-to-b from-sky-200 to-green-200"><!-- Ground --> <rect x="0" y="280" width="500" height="20" fill="#8b5cf6" /> <!-- Grid --> <defs>
+          <pattern id="sim-grid" width="25" height="25" patternunits="userSpaceOnUse">
+           <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.3" />
+          </pattern>
+          <marker id="arrowhead" markerwidth="6" markerheight="4" refx="5" refy="2" orient="auto">
+           <polygon points="0 0, 6 2, 0 4" fill="#374151" />
+          </marker>
+         </defs> <rect width="100%" height="100%" fill="url(#sim-grid)" /> <!-- Trajectory path --> <path id="trajectory-path" stroke="#ef4444" stroke-width="3" fill="none" stroke-dasharray="5,5" opacity="0" /> <!-- Projectile --> <circle id="projectile" cx="50" cy="280" r="8" fill="#fbbf24" opacity="0" /> <!-- Labels --> <text x="10" y="20" class="text-sm fill-current text-gray-700">
+          Y (m)
+         </text> <text x="470" y="295" class="text-sm fill-current text-gray-700">
+          X (m)
+         </text>
+        </svg>
+       </div>
+      </div>
+     </div>
+    </section><!-- Flash Card Tab -->
+    <section id="flashcard" class="tab-content hidden">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Flash Card Gerak Parabola</h2>
+      <p class="text-gray-600 mb-8 text-center">Klik kartu untuk melihat jawaban</p>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Flash Card 1 -->
+       <div class="flashcard" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+         <div class="flashcard-front">
+          <div>
+           <h3 class="text-lg font-bold mb-4">Definisi</h3>
+           <p class="text-sm">Apa itu gerak parabola?</p>
+          </div>
+         </div>
+         <div class="flashcard-back">
+          <div>
+           <p class="text-sm">Gerak dua dimensi yang terjadi ketika benda dilempar dengan sudut tertentu terhadap horizontal, membentuk lintasan parabola.</p>
+          </div>
+         </div>
+        </div>
+       </div><!-- Flash Card 2 -->
+       <div class="flashcard" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+         <div class="flashcard-front">
+          <div>
+           <h3 class="text-lg font-bold mb-4">Komponen X</h3>
+           <p class="text-sm">Jenis gerak pada sumbu horizontal?</p>
+          </div>
+         </div>
+         <div class="flashcard-back">
+          <div>
+           <p class="text-sm">GLB (Gerak Lurus Beraturan) karena tidak ada percepatan horizontal. Kecepatan konstan: v<sub>x</sub> = v<sub>0x</sub></p>
+          </div>
+         </div>
+        </div>
+       </div><!-- Flash Card 3 -->
+       <div class="flashcard" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+         <div class="flashcard-front">
+          <div>
+           <h3 class="text-lg font-bold mb-4">Komponen Y</h3>
+           <p class="text-sm">Jenis gerak pada sumbu vertikal?</p>
+          </div>
+         </div>
+         <div class="flashcard-back">
+          <div>
+           <p class="text-sm">GLBB (Gerak Lurus Berubah Beraturan) karena ada percepatan gravitasi: a<sub>y</sub> = -g = -9,8 m/s²</p>
+          </div>
+         </div>
+        </div>
+       </div><!-- Flash Card 4 -->
+       <div class="flashcard" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+         <div class="flashcard-front">
+          <div>
+           <h3 class="text-lg font-bold mb-4">Rumus Tinggi</h3>
+           <p class="text-sm">Rumus tinggi maksimum?</p>
+          </div>
+         </div>
+         <div class="flashcard-back">
+          <div>
+           <p class="text-sm">h<sub>max</sub> = (v<sub>0y</sub>)² / (2g)<br><br>
+            dimana v<sub>0y</sub> = v<sub>0</sub> sin θ</p>
+          </div>
+         </div>
+        </div>
+       </div><!-- Flash Card 5 -->
+       <div class="flashcard" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+         <div class="flashcard-front">
+          <div>
+           <h3 class="text-lg font-bold mb-4">Rumus Jangkauan</h3>
+           <p class="text-sm">Rumus jangkauan maksimum?</p>
+          </div>
+         </div>
+         <div class="flashcard-back">
+          <div>
+           <p class="text-sm">R = (v<sub>0</sub>² sin 2θ) / g<br><br>
+            Jangkauan maksimum pada θ = 45°</p>
+          </div>
+         </div>
+        </div>
+       </div><!-- Flash Card 6 -->
+       <div class="flashcard" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+         <div class="flashcard-front">
+          <div>
+           <h3 class="text-lg font-bold mb-4">Waktu Terbang</h3>
+           <p class="text-sm">Rumus waktu terbang total?</p>
+          </div>
+         </div>
+         <div class="flashcard-back">
+          <div>
+           <p class="text-sm">t<sub>total</sub> = (2v<sub>0y</sub>) / g<br><br>
+            dimana v<sub>0y</sub> = v<sub>0</sub> sin θ</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="mt-8 text-center"><button id="reset-cards" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"> 🔄 Reset Semua Kartu </button>
+      </div>
+     </div>
+    </section><!-- Pembahasan Soal Tab -->
+    <section id="pembahasan-soal" class="tab-content hidden">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Pembahasan Soal Gerak Parabola</h2>
+      <p class="text-gray-600 mb-8 text-center">Pelajari 4 soal dengan tingkat kesulitan yang meningkat dan pembahasan lengkap</p><!-- Problem Slider Navigation -->
+      <div class="flex justify-center mb-8">
+       <div class="bg-gray-100 p-2 rounded-lg flex space-x-2"><button id="slide-1-btn" class="slide-nav-btn active bg-green-500 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300" data-slide="1">
+         <div class="text-center">
+          <div class="text-sm font-bold">
+           Soal 1
+          </div>
+          <div class="text-xs opacity-80">
+           Mudah
+          </div>
+         </div></button> <button id="slide-2-btn" class="slide-nav-btn bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-300" data-slide="2">
+         <div class="text-center">
+          <div class="text-sm font-bold">
+           Soal 2
+          </div>
+          <div class="text-xs opacity-80">
+           Sedang
+          </div>
+         </div></button> <button id="slide-3-btn" class="slide-nav-btn bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-300" data-slide="3">
+         <div class="text-center">
+          <div class="text-sm font-bold">
+           Soal 3
+          </div>
+          <div class="text-xs opacity-80">
+           Sulit
+          </div>
+         </div></button> <button id="slide-4-btn" class="slide-nav-btn bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-300" data-slide="4">
+         <div class="text-center">
+          <div class="text-sm font-bold">
+           Soal 4
+          </div>
+          <div class="text-xs opacity-80">
+           Analisis
+          </div>
+         </div></button>
+       </div>
+      </div><!-- Slide 1 - Easy Problem -->
+      <div id="slide-1" class="slide-content">
+       <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center mb-4"><span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">MUDAH</span>
+         <h3 class="text-xl font-bold text-green-800">Soal 1: Bola Sepak yang Ditendang</h3>
+        </div>
+        <div class="bg-white p-4 rounded-lg border border-green-200 mb-6">
+         <h4 class="font-semibold text-gray-800 mb-3">📝 Soal:</h4>
+         <p class="text-gray-700 leading-relaxed text-base">Seorang pemain sepak bola menendang bola dengan kecepatan awal 25 m/s pada sudut 30° terhadap horizontal. Hitunglah jangkauan horizontal bola dan tinggi maksimum yang dicapai! (g = 10 m/s²)</p>
+        </div><!-- Step-by-step solution -->
+        <div class="space-y-6"><!-- Given Data -->
+         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h4 class="font-semibold text-blue-800 mb-3">📋 Diketahui:</h4>
+          <ul class="space-y-2 text-blue-700">
+           <li>• Kecepatan awal (v₀) = 25 m/s</li>
+           <li>• Sudut elevasi (θ) = 30°</li>
+           <li>• Percepatan gravitasi (g) = 10 m/s²</li>
+           <li>• sin 30° = 0,5 ; cos 30° = 0,866</li>
+          </ul>
+          <h4 class="font-semibold text-blue-800 mt-4 mb-2">🎯 Ditanya:</h4>
+          <ul class="text-blue-700 space-y-1">
+           <li>a) Jangkauan horizontal (R) = ?</li>
+           <li>b) Tinggi maksimum (h_max) = ?</li>
+          </ul>
+         </div><!-- Solution Steps -->
+         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <h4 class="font-semibold text-yellow-800 mb-4">💡 Penyelesaian Lengkap:</h4>
+          <div class="space-y-4"><!-- Step 1 -->
+           <div class="bg-white p-4 rounded border-l-4 border-green-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span> Hitung komponen kecepatan awal</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Komponen horizontal:</strong></p>
+             <p>v₀ₓ = v₀ cos θ = 25 × cos 30° = 25 × 0,866 = 21,65 m/s</p>
+             <p><strong>Komponen vertikal:</strong></p>
+             <p>v₀ᵧ = v₀ sin θ = 25 × sin 30° = 25 × 0,5 = 12,5 m/s</p>
+            </div>
+           </div><!-- Step 2a -->
+           <div class="bg-white p-4 rounded border-l-4 border-orange-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2a</span> Hitung jangkauan horizontal (R)</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Menggunakan rumus:</strong> R = (v₀² sin 2θ) / g</p>
+             <p>sin 2θ = sin (2 × 30°) = sin 60° = 0,866</p>
+             <p>R = (25² × sin 60°) / 10</p>
+             <p>R = (625 × 0,866) / 10</p>
+             <p>R = 541,25 / 10</p>
+             <p class="font-bold text-orange-600 text-base">R = 54,13 m</p>
+            </div>
+           </div><!-- Step 2b -->
+           <div class="bg-white p-4 rounded border-l-4 border-purple-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2b</span> Hitung tinggi maksimum (h_max)</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Menggunakan rumus:</strong> h_max = (v₀ᵧ)² / (2g)</p>
+             <p>h_max = (12,5)² / (2 × 10)</p>
+             <p>h_max = 156,25 / 20</p>
+             <p class="font-bold text-purple-600 text-base">h_max = 7,81 m</p>
+            </div>
+           </div>
+          </div>
+          <div class="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+           <h5 class="font-bold text-green-800 mb-2">✅ Jawaban Final:</h5>
+           <ul class="text-green-700 space-y-1">
+            <li><strong>a) Jangkauan horizontal = 54,13 meter</strong></li>
+            <li><strong>b) Tinggi maksimum = 7,81 meter</strong></li>
+           </ul>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Slide 2 - Medium Problem -->
+      <div id="slide-2" class="slide-content hidden">
+       <div class="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center mb-4"><span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">SEDANG</span>
+         <h3 class="text-xl font-bold text-orange-800">Soal 2: Pemain Basket Melempar Bola</h3>
+        </div>
+        <div class="bg-white p-4 rounded-lg border border-orange-200 mb-6">
+         <h4 class="font-semibold text-gray-800 mb-3">📝 Soal:</h4>
+         <p class="text-gray-700 leading-relaxed text-base">Seorang pemain basket melempar bola dengan kecepatan awal 15 m/s pada sudut 45° terhadap horizontal. Hitunglah: <br>
+           a) Tinggi maksimum yang dicapai bola<br>
+           b) Waktu total bola di udara<br>
+           c) Jangkauan horizontal bola<br>
+           (g = 9,8 m/s²)</p>
+        </div><!-- Step-by-step solution -->
+        <div class="space-y-6"><!-- Given Data -->
+         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h4 class="font-semibold text-blue-800 mb-3">📋 Diketahui:</h4>
+          <ul class="space-y-2 text-blue-700">
+           <li>• Kecepatan awal (v₀) = 15 m/s</li>
+           <li>• Sudut elevasi (θ) = 45°</li>
+           <li>• Percepatan gravitasi (g) = 9,8 m/s²</li>
+           <li>• sin 45° = cos 45° = 0,707</li>
+          </ul>
+          <h4 class="font-semibold text-blue-800 mt-4 mb-2">🎯 Ditanya:</h4>
+          <ul class="text-blue-700 space-y-1">
+           <li>a) Tinggi maksimum (h_max) = ?</li>
+           <li>b) Waktu terbang (t_total) = ?</li>
+           <li>c) Jangkauan (R) = ?</li>
+          </ul>
+         </div><!-- Solution Steps -->
+         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <h4 class="font-semibold text-yellow-800 mb-4">💡 Penyelesaian Lengkap:</h4>
+          <div class="space-y-4"><!-- Step 1 -->
+           <div class="bg-white p-4 rounded border-l-4 border-green-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span> Hitung komponen kecepatan awal</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Komponen horizontal:</strong></p>
+             <p>v₀ₓ = v₀ cos 45° = 15 × 0,707 = 10,61 m/s</p>
+             <p><strong>Komponen vertikal:</strong></p>
+             <p>v₀ᵧ = v₀ sin 45° = 15 × 0,707 = 10,61 m/s</p>
+            </div>
+           </div><!-- Step 2a -->
+           <div class="bg-white p-4 rounded border-l-4 border-orange-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2a</span> Hitung tinggi maksimum</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Menggunakan rumus:</strong> h_max = (v₀ᵧ)² / (2g)</p>
+             <p>h_max = (10,61)² / (2 × 9,8)</p>
+             <p>h_max = 112,57 / 19,6</p>
+             <p class="font-bold text-orange-600 text-base">h_max = 5,74 m</p>
+            </div>
+           </div><!-- Step 2b -->
+           <div class="bg-white p-4 rounded border-l-4 border-purple-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2b</span> Hitung waktu terbang</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Menggunakan rumus:</strong> t_total = (2v₀ᵧ) / g</p>
+             <p>t_total = (2 × 10,61) / 9,8</p>
+             <p>t_total = 21,22 / 9,8</p>
+             <p class="font-bold text-purple-600 text-base">t_total = 2,17 s</p>
+            </div>
+           </div><!-- Step 2c -->
+           <div class="bg-white p-4 rounded border-l-4 border-red-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2c</span> Hitung jangkauan</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Menggunakan rumus:</strong> R = v₀ₓ × t_total</p>
+             <p>R = 10,61 × 2,17</p>
+             <p class="font-bold text-red-600 text-base">R = 23,02 m</p>
+            </div>
+           </div>
+          </div>
+          <div class="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+           <h5 class="font-bold text-green-800 mb-2">✅ Jawaban Final:</h5>
+           <ul class="text-green-700 space-y-1">
+            <li><strong>a) Tinggi maksimum = 5,74 m</strong></li>
+            <li><strong>b) Waktu terbang = 2,17 s</strong></li>
+            <li><strong>c) Jangkauan = 23,02 m</strong></li>
+           </ul>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Slide 3 - Hard Problem -->
+      <div id="slide-3" class="slide-content hidden">
+       <div class="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center mb-4"><span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">SULIT</span>
+         <h3 class="text-xl font-bold text-red-800">Soal 3: Proyektil dari Ketinggian dengan Target Spesifik</h3>
+        </div>
+        <div class="bg-white p-4 rounded-lg border border-red-200 mb-6">
+         <h4 class="font-semibold text-gray-800 mb-3">📝 Soal:</h4>
+         <p class="text-gray-700 leading-relaxed text-base">Sebuah bola dilempar dari atas gedung setinggi 45 m dengan kecepatan awal 30 m/s pada sudut 37° terhadap horizontal. Bola tersebut harus mengenai target yang berada di tanah pada jarak horizontal 80 m dari dasar gedung. Hitunglah: <br>
+           a) Apakah bola akan mengenai target tersebut?<br>
+           b) Waktu yang diperlukan bola untuk mencapai tanah<br>
+           c) Kecepatan bola saat mengenai tanah<br>
+           (g = 10 m/s², sin 37° = 0,6, cos 37° = 0,8)</p>
+        </div><!-- Step-by-step solution -->
+        <div class="space-y-6"><!-- Given Data -->
+         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h4 class="font-semibold text-blue-800 mb-3">📋 Diketahui:</h4>
+          <ul class="space-y-2 text-blue-700">
+           <li>• Ketinggian awal (h₀) = 45 m</li>
+           <li>• Kecepatan awal (v₀) = 30 m/s</li>
+           <li>• Sudut elevasi (θ) = 37°</li>
+           <li>• Jarak target horizontal = 80 m</li>
+           <li>• sin 37° = 0,6 ; cos 37° = 0,8</li>
+           <li>• Percepatan gravitasi (g) = 10 m/s²</li>
+          </ul>
+          <h4 class="font-semibold text-blue-800 mt-4 mb-2">🎯 Ditanya:</h4>
+          <ul class="text-blue-700 space-y-1">
+           <li>a) Apakah bola mengenai target di x = 80 m?</li>
+           <li>b) Waktu mencapai tanah (t) = ?</li>
+           <li>c) Kecepatan saat mengenai tanah (v) = ?</li>
+          </ul>
+         </div><!-- Solution Steps -->
+         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <h4 class="font-semibold text-yellow-800 mb-4">💡 Penyelesaian Lengkap:</h4>
+          <div class="space-y-4"><!-- Step 1 -->
+           <div class="bg-white p-4 rounded border-l-4 border-green-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span> Hitung komponen kecepatan awal</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Komponen horizontal:</strong></p>
+             <p>v₀ₓ = v₀ cos 37° = 30 × 0,8 = 24 m/s</p>
+             <p><strong>Komponen vertikal:</strong></p>
+             <p>v₀ᵧ = v₀ sin 37° = 30 × 0,6 = 18 m/s</p>
+            </div>
+           </div><!-- Step 2b -->
+           <div class="bg-white p-4 rounded border-l-4 border-orange-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2</span> Hitung waktu mencapai tanah (y = 0)</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Menggunakan persamaan:</strong> y = h₀ + v₀ᵧt - ½gt²</p>
+             <p>Saat mencapai tanah: y = 0</p>
+             <p>0 = 45 + 18t - 5t²</p>
+             <p>5t² - 18t - 45 = 0</p>
+             <p>t² - 3,6t - 9 = 0</p>
+             <p><strong>Menggunakan rumus kuadrat:</strong></p>
+             <p>t = (3,6 ± √(3,6² + 4×9))/2 = (3,6 ± √(12,96 + 36))/2</p>
+             <p>t = (3,6 ± √48,96)/2 = (3,6 ± 6,997)/2</p>
+             <p>t₁ = (3,6 + 6,997)/2 = 5,299 s (diambil yang positif)</p>
+             <p class="font-bold text-orange-600 text-base">t = 5,3 detik</p>
+            </div>
+           </div><!-- Step 2a -->
+           <div class="bg-white p-4 rounded border-l-4 border-purple-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">3</span> Periksa apakah bola mengenai target</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Jangkauan horizontal bola:</strong></p>
+             <p>x = v₀ₓ × t = 24 × 5,3 = 127,2 m</p>
+             <p><strong>Perbandingan dengan target:</strong></p>
+             <p>Target berada di x = 80 m</p>
+             <p>Bola mendarat di x = 127,2 m</p>
+             <p class="font-bold text-purple-600 text-base">Bola TIDAK mengenai target (melewati target sejauh 47,2 m)</p>
+            </div>
+           </div><!-- Step 2c -->
+           <div class="bg-white p-4 rounded border-l-4 border-red-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">4</span> Hitung kecepatan saat mengenai tanah</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Komponen horizontal (tetap konstan):</strong></p>
+             <p>vₓ = v₀ₓ = 24 m/s</p>
+             <p><strong>Komponen vertikal saat t = 5,3 s:</strong></p>
+             <p>vᵧ = v₀ᵧ - gt = 18 - (10 × 5,3) = 18 - 53 = -35 m/s</p>
+             <p><strong>Kecepatan total:</strong></p>
+             <p>v = √(vₓ² + vᵧ²) = √(24² + (-35)²)</p>
+             <p>v = √(576 + 1225) = √1801</p>
+             <p class="font-bold text-red-600 text-base">v = 42,44 m/s</p>
+             <p><strong>Arah kecepatan:</strong></p>
+             <p>tan α = |vᵧ|/vₓ = 35/24 = 1,458</p>
+             <p>α = arctan(1,458) ≈ 55,6° (di bawah horizontal)</p>
+            </div>
+           </div><!-- Bonus: Position at target -->
+           <div class="bg-white p-4 rounded border-l-4 border-indigo-500">
+            <h5 class="font-bold text-gray-800 mb-3 flex items-center"><span class="bg-indigo-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">+</span> Bonus: Posisi bola saat x = 80 m (di atas target)</h5>
+            <div class="text-sm text-gray-700 space-y-2">
+             <p><strong>Waktu untuk mencapai x = 80 m:</strong></p>
+             <p>t = x/v₀ₓ = 80/24 = 3,33 s</p>
+             <p><strong>Ketinggian bola saat t = 3,33 s:</strong></p>
+             <p>y = 45 + 18(3,33) - 5(3,33)²</p>
+             <p>y = 45 + 59,94 - 55,44 = 49,5 m</p>
+             <p class="font-bold text-indigo-600 text-base">Bola berada 49,5 m di atas target</p>
+            </div>
+           </div>
+          </div>
+          <div class="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+           <h5 class="font-bold text-green-800 mb-2">✅ Jawaban Final:</h5>
+           <ul class="text-green-700 space-y-1">
+            <li><strong>a) Bola TIDAK mengenai target (melewati sejauh 47,2 m)</strong></li>
+            <li><strong>b) Waktu mencapai tanah = 5,3 detik</strong></li>
+            <li><strong>c) Kecepatan saat mengenai tanah = 42,44 m/s (55,6° di bawah horizontal)</strong></li>
+           </ul>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Slide 4 - Analysis Problem -->
+      <div id="slide-4" class="slide-content hidden">
+       <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center mb-4"><span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">ANALISIS</span>
+         <h3 class="text-xl font-bold text-purple-800">Soal 4: Analisis Dua Bola Mengenai Sasaran Bersamaan</h3>
+        </div>
+        <div class="bg-white p-4 rounded-lg border border-purple-200 mb-4">
+         <h4 class="font-semibold text-gray-800 mb-3">📝 Soal:</h4>
+         <p class="text-gray-700 leading-relaxed mb-4">Dua orang mencoba cara yang berbeda untuk menembak sasaran pada titik C. Orang pertama menggunakan bola A dan diletakkan di tepi meja. Orang kedua menggunakan bola B yang berada di lantai. Bola A dan B kemudian dihentakkan secara bersamaan pada arah mendatar (g = 10 m/s² dan gesekan diabaikan). Ternyata kedua bola sampai dan mengenai sasaran di titik C secara bersamaan.</p>
+         <p class="text-gray-700 leading-relaxed mb-4"><strong>Apa saja kondisi awal yang dapat menyebabkan hal tersebut?</strong></p>
+         <p class="text-sm text-gray-600 italic">Keterangan: Gesekan antara bola dengan lantai, permukaan meja, maupun udara diabaikan. Pilihlah <strong>Benar</strong> atau <strong>Salah</strong> untuk setiap kondisi berikut.</p>
+        </div><!-- Illustration -->
+        <div class="bg-white p-6 rounded-lg border border-purple-200 mb-6">
+         <h4 class="font-semibold text-purple-800 mb-4 text-center">📐 Ilustrasi Situasi</h4>
+         <div class="bg-gradient-to-b from-sky-100 to-green-100 p-4 rounded-lg">
+          <svg width="100%" height="300" viewbox="0 0 600 250" class="border border-gray-300 rounded"><!-- Background --> <defs>
+            <pattern id="grid-slide4" width="20" height="20" patternunits="userSpaceOnUse">
+             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="0.5" />
+            </pattern>
+            <marker id="arrow-slide4" markerwidth="6" markerheight="4" refx="5" refy="2" orient="auto" markerunits="strokeWidth">
+             <path d="M0,0 L0,4 L6,2 z" fill="#7c3aed" />
+            </marker>
+           </defs> <rect width="100%" height="100%" fill="url(#grid-slide4)" /> <!-- Ground --> <rect x="0" y="200" width="600" height="50" fill="#8b5cf6" opacity="0.3" /> <text x="10" y="220" class="text-sm fill-gray-700 font-semibold">
+            Lantai
+           </text> <!-- Table --> <rect x="50" y="120" width="120" height="80" fill="#d97706" opacity="0.7" /> <text x="110" y="115" text-anchor="middle" class="text-sm fill-gray-700 font-semibold">
+            Meja
+           </text> <!-- Ball A (on table) --> <circle cx="170" cy="115" r="8" fill="#ef4444" stroke="#dc2626" stroke-width="2" /> <text x="170" y="105" text-anchor="middle" class="text-sm fill-red-700 font-bold">
+            A
+           </text> <!-- Ball B (on floor, directly below A) --> <circle cx="170" cy="195" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" /> <text x="170" y="185" text-anchor="middle" class="text-sm fill-blue-700 font-bold">
+            B
+           </text> <!-- Target C --> <circle cx="450" cy="195" r="12" fill="#10b981" stroke="#059669" stroke-width="3" /> <text x="450" y="202" text-anchor="middle" class="text-sm fill-white font-bold">
+            C
+           </text> <text x="450" y="220" text-anchor="middle" class="text-sm fill-gray-700 font-semibold">
+            Sasaran
+           </text> <!-- Trajectory A (dashed) --> <path d="M 170 115 Q 310 80 450 195" stroke="#ef4444" stroke-width="3" fill="none" stroke-dasharray="8,4" /> <!-- Trajectory B (dashed) --> <path d="M 170 195 L 450 195" stroke="#3b82f6" stroke-width="3" fill="none" stroke-dasharray="8,4" /> <!-- Velocity vectors --> <line x1="170" y1="115" x2="210" y2="115" stroke="#ef4444" stroke-width="3" marker-end="url(#arrow-slide4)" /> <text x="190" y="110" text-anchor="middle" class="text-xs fill-red-700 font-bold">
+            vₐ
+           </text> <line x1="170" y1="195" x2="210" y2="195" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow-slide4)" /> <text x="190" y="190" text-anchor="middle" class="text-xs fill-blue-700 font-bold">
+            vᵦ
+           </text> <!-- Height indicators --> <line x1="30" y1="120" x2="30" y2="200" stroke="#374151" stroke-width="2" /> <line x1="25" y1="120" x2="35" y2="120" stroke="#374151" stroke-width="2" /> <line x1="25" y1="200" x2="35" y2="200" stroke="#374151" stroke-width="2" /> <text x="15" y="165" text-anchor="middle" class="text-sm fill-gray-700 font-bold">
+            h
+           </text> <!-- Distance indicator --> <line x1="170" y1="240" x2="450" y2="240" stroke="#374151" stroke-width="2" /> <line x1="170" y1="235" x2="170" y2="245" stroke="#374151" stroke-width="2" /> <line x1="450" y1="235" x2="450" y2="245" stroke="#374151" stroke-width="2" /> <text x="310" y="235" text-anchor="middle" class="text-sm fill-gray-700 font-bold">
+            d
+           </text>
+          </svg>
+         </div>
+         <div class="mt-4 grid md:grid-cols-3 gap-4 text-sm">
+          <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+           <h6 class="font-bold text-red-800 mb-2">🔴 Bola A</h6>
+           <p class="text-red-700 text-xs">Diletakkan di tepi meja, dihentakkan horizontal</p>
+          </div>
+          <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+           <h6 class="font-bold text-blue-800 mb-2">🔵 Bola B</h6>
+           <p class="text-blue-700 text-xs">Berada di lantai, dihentakkan horizontal</p>
+          </div>
+          <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+           <h6 class="font-bold text-green-800 mb-2">🎯 Sasaran C</h6>
+           <p class="text-green-700 text-xs">Kedua bola mengenai sasaran bersamaan</p>
+          </div>
+         </div>
+        </div><!-- Complete Analysis and Solution -->
+        <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 mb-6">
+         <h4 class="font-bold text-yellow-800 mb-4">📊 Analisis Lengkap dan Pembahasan:</h4>
+         <div class="space-y-6"><!-- Physics Analysis -->
+          <div class="bg-white p-4 rounded-lg border border-yellow-300">
+           <h5 class="font-bold text-gray-800 mb-3">🔬 Analisis Fisika:</h5>
+           <div class="text-sm text-gray-700 space-y-3">
+            <p><strong>Untuk bola A (gerak parabola dari ketinggian):</strong></p>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+             <li>Waktu terbang: t = √(2h/g)</li>
+             <li>Jangkauan horizontal: x = v₀ₐ × t</li>
+            </ul>
+            <p><strong>Untuk bola B (gerak lurus horizontal):</strong></p>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+             <li>Bergerak lurus horizontal di lantai</li>
+             <li>Jarak tempuh: x = v₀ᵦ × t</li>
+            </ul>
+            <p><strong>Syarat kedua bola bertemu di titik C:</strong></p>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+             <li>Waktu tempuh sama: t</li>
+             <li>Jarak horizontal sama: d</li>
+            </ul>
+           </div>
+          </div><!-- Condition Analysis -->
+          <div class="grid md:grid-cols-3 gap-4">
+           <div class="bg-white p-4 rounded-lg border border-red-300">
+            <h6 class="font-bold text-red-800 mb-2">Kondisi 1: Massa</h6>
+            <p class="text-sm text-red-700 mb-2"><strong>Jawaban: SALAH</strong></p>
+            <p class="text-xs text-gray-600">Massa tidak mempengaruhi gerak parabola dalam medan gravitasi. Yang penting adalah kecepatan awal dan ketinggian.</p>
+           </div>
+           <div class="bg-white p-4 rounded-lg border border-orange-300">
+            <h6 class="font-bold text-orange-800 mb-2">Kondisi 2: Ketinggian</h6>
+            <p class="text-sm text-orange-700 mb-2"><strong>Jawaban: BISA BENAR</strong></p>
+            <p class="text-xs text-gray-600">Ketinggian 0,8 m bisa benar jika kecepatan awal dan jarak sesuai dengan perhitungan fisika.</p>
+           </div>
+           <div class="bg-white p-4 rounded-lg border border-blue-300">
+            <h6 class="font-bold text-blue-800 mb-2">Kondisi 3: Kecepatan B</h6>
+            <p class="text-sm text-blue-700 mb-2"><strong>Jawaban: BISA BENAR</strong></p>
+            <p class="text-xs text-gray-600">Kecepatan 10 m/s bisa benar jika sesuai dengan waktu tempuh bola A dan jarak ke sasaran.</p>
+           </div>
+          </div><!-- Mathematical Example -->
+          <div class="bg-white p-4 rounded-lg border border-purple-300">
+           <h5 class="font-bold text-purple-800 mb-3">🧮 Contoh Perhitungan Lengkap:</h5>
+           <div class="text-sm text-gray-700 space-y-3">
+            <p><strong>Misalkan:</strong> h = 0,8 m, d = 4 m, vᵦ = 10 m/s, g = 10 m/s²</p>
+            <div class="bg-gray-50 p-3 rounded">
+             <p class="font-semibold text-purple-700 mb-2">Langkah 1: Hitung waktu bola A jatuh</p>
+             <p>t = √(2h/g) = √(2×0,8/10) = √0,16 = 0,4 s</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded">
+             <p class="font-semibold text-purple-700 mb-2">Langkah 2: Hitung kecepatan awal bola A yang diperlukan</p>
+             <p>vₐ = d/t = 4/0,4 = 10 m/s</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded">
+             <p class="font-semibold text-purple-700 mb-2">Langkah 3: Verifikasi jarak tempuh bola B</p>
+             <p>d = vᵦ × t = 10 × 0,4 = 4 m ✓</p>
+            </div>
+            <p class="font-bold text-purple-600 mt-3 p-3 bg-purple-50 rounded">✅ Kesimpulan: Dalam contoh ini, kondisi 2 dan 3 BENAR jika parameter lain sesuai!</p>
+           </div>
+          </div><!-- General Solution -->
+          <div class="bg-white p-4 rounded-lg border border-green-300">
+           <h5 class="font-bold text-green-800 mb-3">🎯 Solusi Umum:</h5>
+           <div class="text-sm text-gray-700 space-y-2">
+            <p><strong>Syarat agar kedua bola bertemu:</strong></p>
+            <div class="bg-green-50 p-3 rounded">
+             <p>1. Waktu sama: t = √(2h/g)</p>
+             <p>2. Jarak sama: vₐ × t = vᵦ × t</p>
+             <p>3. Hubungan: vₐ = vᵦ (kecepatan horizontal harus sama!)</p>
+            </div>
+            <p class="font-bold text-green-600 mt-3">Jadi, yang menentukan adalah ketinggian meja (h) dan kecepatan horizontal kedua bola harus sama, bukan massa!</p>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Navigation Controls -->
+      <div class="flex justify-between items-center mt-8"><button id="prev-slide" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"> ← Soal Sebelumnya </button>
+       <div class="text-center">
+        <p class="text-gray-600 text-sm">Tingkat Kesulitan</p>
+        <div class="flex space-x-2 mt-1"><span class="slide-difficulty-indicator active w-3 h-3 bg-green-500 rounded-full"></span> <span class="slide-difficulty-indicator w-3 h-3 bg-gray-300 rounded-full"></span> <span class="slide-difficulty-indicator w-3 h-3 bg-gray-300 rounded-full"></span> <span class="slide-difficulty-indicator w-3 h-3 bg-gray-300 rounded-full"></span>
+        </div>
+       </div><button id="next-slide" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"> Soal Selanjutnya → </button>
+      </div>
+     </div>
+    </section><!-- Kuis Tab -->
+    <section id="kuis" class="tab-content hidden">
+     <div class="bg-white rounded-xl shadow-lg p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6">Kuis Gerak Parabola</h2>
+      <p class="text-gray-600 mb-8 text-center">Uji pemahaman Anda dengan 10 soal benar/salah</p><!-- Quiz Progress -->
+      <div class="mb-8">
+       <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">Progress Kuis</span> <span id="quiz-progress" class="text-sm font-medium text-blue-600">0/10</span>
+       </div>
+       <div class="w-full bg-gray-200 rounded-full h-2">
+        <div id="quiz-progress-bar" class="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+       </div>
+      </div><!-- Quiz Container -->
+      <div id="quiz-container" class="space-y-6"><!-- Question 1 -->
+       <div class="quiz-question bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-200" data-question="1">
+        <div class="flex items-start space-x-4">
+         <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          1
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Gerak parabola adalah gabungan dari gerak lurus beraturan (GLB) pada sumbu horizontal dan gerak lurus berubah beraturan (GLBB) pada sumbu vertikal.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 2 -->
+       <div class="quiz-question bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border-2 border-purple-200" data-question="2">
+        <div class="flex items-start space-x-4">
+         <div class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          2
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Pada gerak parabola, kecepatan horizontal proyektil berubah-ubah karena pengaruh gravitasi.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 3 -->
+       <div class="quiz-question bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg border-2 border-green-200" data-question="3">
+        <div class="flex items-start space-x-4">
+         <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          3
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Di titik tertinggi lintasan parabola, kecepatan vertikal proyektil sama dengan nol (vᵧ = 0).</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 4 -->
+       <div class="quiz-question bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-lg border-2 border-orange-200" data-question="4">
+        <div class="flex items-start space-x-4">
+         <div class="bg-orange-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          4
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Sudut elevasi 45° memberikan jangkauan maksimum untuk proyektil yang diluncurkan dari tanah.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 5 -->
+       <div class="quiz-question bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg border-2 border-red-200" data-question="5">
+        <div class="flex items-start space-x-4">
+         <div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          5
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Waktu yang diperlukan proyektil untuk naik ke titik tertinggi sama dengan waktu untuk turun kembali ke tanah.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 6 -->
+       <div class="quiz-question bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border-2 border-indigo-200" data-question="6">
+        <div class="flex items-start space-x-4">
+         <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          6
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Pada gerak parabola, percepatan gravitasi hanya mempengaruhi komponen vertikal gerakan, tidak mempengaruhi komponen horizontal.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 7 -->
+       <div class="quiz-question bg-gradient-to-r from-teal-50 to-cyan-50 p-6 rounded-lg border-2 border-teal-200" data-question="7">
+        <div class="flex items-start space-x-4">
+         <div class="bg-teal-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          7
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Jika dua proyektil diluncurkan dengan kecepatan awal yang sama tetapi sudut elevasi berbeda (30° dan 60°), maka jangkauan horizontalnya akan sama.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 8 -->
+       <div class="quiz-question bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-lg border-2 border-amber-200" data-question="8">
+        <div class="flex items-start space-x-4">
+         <div class="bg-amber-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          8
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Massa proyektil mempengaruhi bentuk lintasan parabola yang dihasilkan.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 9 -->
+       <div class="quiz-question bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-lg border-2 border-rose-200" data-question="9">
+        <div class="flex items-start space-x-4">
+         <div class="bg-rose-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          9
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Pada gerak parabola, kecepatan total proyektil mencapai nilai minimum di titik tertinggi lintasan.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div><!-- Question 10 -->
+       <div class="quiz-question bg-gradient-to-r from-violet-50 to-purple-50 p-6 rounded-lg border-2 border-violet-200" data-question="10">
+        <div class="flex items-start space-x-4">
+         <div class="bg-violet-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+          10
+         </div>
+         <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4">Jika hambatan udara diabaikan, maka lintasan gerak parabola akan selalu simetris terhadap garis vertikal yang melalui titik tertinggi.</h4>
+          <div class="flex space-x-4"><button class="quiz-option bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="true"> ✓ Benar </button> <button class="quiz-option bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-300" data-answer="false"> ✗ Salah </button>
+          </div>
+          <div class="quiz-feedback hidden mt-4 p-3 rounded-lg"></div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+   </main>
+  </div>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a52f060a21fe78b',t:'MTc2NDI2MDI4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
